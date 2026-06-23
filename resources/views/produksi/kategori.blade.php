@@ -1,6 +1,51 @@
 @extends('layouts.admin')
 @section('title', 'Kategori')
 @section('page-title', 'Kategori Produk')
+@section('styles')
+<style>
+    .kategori-grid {
+        display: grid;
+        grid-template-columns: minmax(320px, 0.9fr) minmax(560px, 1.15fr);
+        gap: 1.75rem;
+        align-items: start;
+    }
+
+    .kategori-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    }
+
+    .kategori-table-wrap > table {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .kategori-table-wrap th,
+    .kategori-table-wrap td {
+        white-space: nowrap;
+    }
+
+    .kategori-table-wrap th:last-child,
+    .kategori-table-wrap td:last-child {
+        width: 1%;
+        text-align: right;
+    }
+
+    .kategori-table-wrap form {
+        display: inline-flex;
+        justify-content: flex-end;
+        margin: 0;
+    }
+
+    @media (max-width: 1180px) {
+        .kategori-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+@endsection
 @section('sidebar-menu')
 <div class="sidebar-divider">Menu Produksi</div>
 <li><a href="{{ route('produksi.dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
@@ -14,7 +59,7 @@
 
 @section('content')
 <div style="padding-top: 1rem;">
-<div class="grid-2">
+<div class="kategori-grid">
     <div class="card" style="border-left: 5px solid var(--primary);">
         <div class="card-header"><h3>Tambah Kategori</h3></div>
         <div class="card-body">
@@ -27,7 +72,7 @@
     </div>
     <div class="card" style="border-left: 5px solid var(--primary);">
         <div class="card-header"><h3>Daftar Kategori</h3></div>
-        <div class="card-body" style="padding:0"><table>
+        <div class="card-body table-responsive kategori-table-wrap" style="padding:0"><table>
             <thead><tr><th>Kategori</th><th>Slug</th><th>Jumlah Produk</th><th>Aksi</th></tr></thead>
             <tbody>
                 @foreach($kategori as $kat)

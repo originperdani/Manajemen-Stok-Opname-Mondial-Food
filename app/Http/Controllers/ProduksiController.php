@@ -12,6 +12,7 @@ use App\Models\KategoriProduk;
 use App\Helpers\CacheHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProduksiController extends Controller
@@ -49,17 +50,22 @@ class ProduksiController extends Controller
             'kategori_id' => 'required|exists:kategori_produk,id',
             'harga' => 'required|numeric|min:0',
             'stok' => 'required|integer|min:0',
-            'gambar' => 'nullable|image|max:2048',
+            'gambar' => 'nullable|image|max:5120',
         ]);
 
         $data = $request->except('gambar');
         $data['slug'] = Str::slug($request->nama_produk) . '-' . Str::random(5);
+        $data['is_active'] = $request->boolean('is_active');
+        $data['is_featured'] = $request->boolean('is_featured');
 
         if ($request->hasFile('gambar')) {
             $data['gambar'] = $request->file('gambar')->store('produk', 'public');
         }
 
         Produk::create($data);
+        CacheHelper::bumpVersion('produk');
+        CacheHelper::bumpVersion('kategori_produk');
+
         return redirect()->route('produksi.produk')->with('success', 'Produk berhasil ditambahkan!');
     }
 
@@ -75,21 +81,38 @@ class ProduksiController extends Controller
             'nama_produk' => 'required|string|max:255',
             'kategori_id' => 'required|exists:kategori_produk,id',
             'harga' => 'required|numeric|min:0',
-            'gambar' => 'nullable|image|max:2048',
+            'gambar' => 'nullable|image|max:5120',
         ]);
 
         $data = $request->except('gambar');
+        $data['is_active'] = $request->boolean('is_active');
+        $data['is_featured'] = $request->boolean('is_featured');
+
         if ($request->hasFile('gambar')) {
+            if ($produk->gambar && Storage::disk('public')->exists($produk->gambar)) {
+                Storage::disk('public')->delete($produk->gambar);
+            }
+
             $data['gambar'] = $request->file('gambar')->store('produk', 'public');
         }
 
         $produk->update($data);
+        CacheHelper::bumpVersion('produk');
+        CacheHelper::bumpVersion('kategori_produk');
+
         return redirect()->route('produksi.produk')->with('success', 'Produk berhasil diupdate!');
     }
 
     public function deleteProduk(Produk $produk)
     {
+        if ($produk->gambar && Storage::disk('public')->exists($produk->gambar)) {
+            Storage::disk('public')->delete($produk->gambar);
+        }
+
         $produk->delete();
+        CacheHelper::bumpVersion('produk');
+        CacheHelper::bumpVersion('kategori_produk');
+
         return back()->with('success', 'Produk berhasil dihapus!');
     }
 
@@ -108,12 +131,17 @@ class ProduksiController extends Controller
             'slug' => Str::slug($request->nama_kategori),
             'deskripsi' => $request->deskripsi,
         ]);
+        CacheHelper::bumpVersion('kategori_produk');
+
         return back()->with('success', 'Kategori berhasil ditambahkan!');
     }
 
     public function deleteKategori(KategoriProduk $kategori)
     {
         $kategori->delete();
+        CacheHelper::bumpVersion('kategori_produk');
+        CacheHelper::bumpVersion('produk');
+
         return back()->with('success', 'Kategori berhasil dihapus!');
     }
 

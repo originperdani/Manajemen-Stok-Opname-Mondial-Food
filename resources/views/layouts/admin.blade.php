@@ -655,16 +655,28 @@
             margin: 0; /* Reset margin karena sudah diatur oleh gap di action-header */
         }
 
-        /* Table Responsive without scroll */
-        .table-container {
+        /* Table Responsive */
+        .table-responsive,
+        .table-container,
+        .admin-table-scroll {
             width: 100%;
-            overflow-x: auto;
+            max-width: 100%;
+            display: block;
+            overflow-x: auto !important;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            overscroll-behavior-x: contain;
             background: #fff;
             border-radius: var(--radius-lg);
         }
 
-        .admin-table-scroll {
-            width: 100%;
+        .table-responsive > table,
+        .table-container > table,
+        .admin-table-scroll > table {
+            width: max-content;
+            min-width: max(760px, 100%);
+            max-width: none;
         }
 
         table { width: 100%; border-collapse: collapse; table-layout: auto; }
@@ -683,6 +695,14 @@
             padding: 1rem 1rem; 
             border-bottom: 1px solid var(--border); 
             font-size: 0.95rem;
+        }
+        .table-responsive th,
+        .table-responsive td,
+        .table-container th,
+        .table-container td,
+        .admin-table-scroll th,
+        .admin-table-scroll td {
+            white-space: nowrap;
         }
         table tr:last-child td { border-bottom: none; }
         .btn-primary { background: var(--gradient-gold); color: #fff; }
@@ -1097,11 +1117,7 @@
     </div>
 
     <script>
-        const adminTableMedia = window.matchMedia('(max-width: 1024px)');
-
         function ensureAdminTableScroll() {
-            if (!adminTableMedia.matches) return;
-
             document.querySelectorAll('.content-area table').forEach(table => {
                 if (table.closest('.table-responsive, .table-container, .admin-table-scroll')) {
                     return;
@@ -1115,12 +1131,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', ensureAdminTableScroll);
-
-        if (adminTableMedia.addEventListener) {
-            adminTableMedia.addEventListener('change', ensureAdminTableScroll);
-        } else {
-            adminTableMedia.addListener(ensureAdminTableScroll);
-        }
 
         function toggleSidebar() {
             const sidebar = document.getElementById('adminSidebar');

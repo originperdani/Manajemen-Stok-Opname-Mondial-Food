@@ -19,15 +19,16 @@ class ProfileController extends Controller
         
         $request->validate([
             'name' => 'required|string|max:255',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
         $data = $request->only('name');
         
         if ($request->hasFile('foto')) {
-            if ($user->foto && Storage::exists('public/' . $user->foto)) {
-                Storage::delete('public/' . $user->foto);
+            if ($user->foto && Storage::disk('public')->exists($user->foto)) {
+                Storage::disk('public')->delete($user->foto);
             }
+
             $path = $request->file('foto')->store('profile', 'public');
             $data['foto'] = $path;
         }

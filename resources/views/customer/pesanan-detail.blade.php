@@ -460,8 +460,8 @@
 
 <section class="pesanan-detail-section">
     <div class="pesanan-detail-container">
-        <a href="{{ $transaksi->pembayaran && $transaksi->pembayaran->status !== 'berhasil' ? route('customer.checkout') : route('customer.pesanan') }}" class="back-btn reveal fade-bottom">
-            <i class="fas fa-arrow-left"></i> {{ $transaksi->pembayaran && $transaksi->pembayaran->status !== 'berhasil' ? 'Kembali ke Checkout' : 'Kembali ke Pesanan' }}
+        <a href="{{ route('customer.pesanan') }}" class="back-btn reveal fade-bottom">
+            <i class="fas fa-arrow-left"></i> Kembali ke Pesanan
         </a>
 
         @if($transaksi->pembayaran)
@@ -630,7 +630,7 @@
 
 @section('scripts')
 @if($transaksi->pembayaran && in_array($transaksi->pembayaran->status, ['belum_bayar', 'pending']) && $transaksi->pembayaran->metode === 'midtrans' && $transaksi->status !== 'dibatalkan')
-<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
+<script src="{{ config('midtrans.snap_url') }}" data-client-key="{{ config('midtrans.client_key') }}"></script>
 <script type="text/javascript">
     document.getElementById('pay-button').onclick = function(){
         // Generate snap token via AJAX

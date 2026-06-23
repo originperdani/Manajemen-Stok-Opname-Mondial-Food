@@ -513,7 +513,7 @@
 @endsection
 
 @section('scripts')
-<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
+<script src="{{ config('midtrans.snap_url') }}" data-client-key="{{ config('midtrans.client_key') }}"></script>
 <script>
 const subtotal = {{ $total }};
 const alamatToko = 'Mondial Bakery, Jl. Mesjid Al-Akhyar No.34, Gandul, Cinere, Depok City, West Java 16512';

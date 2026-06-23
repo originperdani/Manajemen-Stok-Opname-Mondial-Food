@@ -257,13 +257,14 @@ class CustomerController extends Controller
                 'status' => 'menunggu',
             ]);
 
+            // Generate Snap Token Midtrans
+            $transaksi->load('detail.produk', 'pembayaran');
+            $snapToken = $this->generateSnapToken($transaksi);
+
             Keranjang::where('user_id', auth()->id())->delete();
 
             CacheHelper::bumpVersion('produk');
             DB::commit();
-            
-            // Generate Snap Token Midtrans
-            $snapToken = $this->generateSnapToken($transaksi);
             
             return response()->json([
                 'success' => true,
@@ -271,8 +272,14 @@ class CustomerController extends Controller
                 'transaksi_id' => $transaksi->id
             ]);
         } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Gagal memproses pesanan: ' . $e->getMessage()], 500);
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => $this->formatCheckoutError($e),
+            ], 500);
         }
     }
     
@@ -280,8 +287,9 @@ class CustomerController extends Controller
     {
         try {
             // Konfigurasi Midtrans
+            $this->ensureMidtransConfigured();
             Config::$serverKey = config('midtrans.server_key');
-            Config::$isProduction = config('midtrans.env') === 'production';
+            Config::$isProduction = (bool) config('midtrans.is_production');
             Config::$isSanitized = true;
             Config::$is3ds = true;
             
@@ -365,14 +373,14 @@ class CustomerController extends Controller
             ]);
         } catch (\Exception $e) {
             \Log::error('Midtrans Snap Token Error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['error' => $this->formatCheckoutError($e)], 500);
         }
     }
 
     public function pesanan()
     {
         $pesananQuery = Transaksi::where('user_id', auth()->id())
-            ->with('pembayaran', 'pengiriman')
+            ->with('pembayaran', 'pengiriman', 'detail.produk')
             ->latest();
         
         $pesanan = $pesananQuery->paginate(10);
@@ -411,8 +419,9 @@ class CustomerController extends Controller
     private function checkAndUpdateMidtransStatus(Transaksi $transaksi): void
     {
         try {
+            $this->ensureMidtransConfigured();
             Config::$serverKey = config('midtrans.server_key');
-            Config::$isProduction = config('midtrans.env') === 'production';
+            Config::$isProduction = (bool) config('midtrans.is_production');
             
             // Use the stored referensi (which includes retry suffix) or fallback to kode_transaksi
             $midtransOrderId = $transaksi->pembayaran->referensi ?? $transaksi->kode_transaksi;
@@ -437,6 +446,30 @@ class CustomerController extends Controller
         } catch (\Exception $e) {
             // Ignore errors, just continue
         }
+    }
+
+    private function ensureMidtransConfigured(): void
+    {
+        if (blank(config('midtrans.client_key')) || blank(config('midtrans.server_key'))) {
+            throw new \RuntimeException(
+                'Konfigurasi Midtrans belum terbaca. Pastikan MIDTRANS_CLIENT_KEY dan MIDTRANS_SERVER_KEY sudah diisi di .env hosting, lalu jalankan php artisan optimize:clear dan php artisan config:cache.'
+            );
+        }
+    }
+
+    private function formatCheckoutError(\Throwable $e): string
+    {
+        $message = $e->getMessage();
+
+        if (
+            str_contains($message, 'HTTP status code: 401')
+            || str_contains($message, 'Access denied')
+            || str_contains($message, 'client or server key')
+        ) {
+            return 'Midtrans menolak API key. Pastikan MIDTRANS_ENV sesuai dengan jenis key yang dipakai: production memakai key Mid-..., sandbox memakai key SB-Mid-..., lalu bersihkan cache config Laravel.';
+        }
+
+        return 'Gagal memproses pesanan: ' . $message;
     }
     
     private function updatePaymentSuccess(Transaksi $transaksi, $pembayaran, $midtransResponse = null): void

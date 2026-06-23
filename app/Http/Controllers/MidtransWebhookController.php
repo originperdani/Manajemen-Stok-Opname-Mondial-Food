@@ -14,7 +14,7 @@ class MidtransWebhookController extends Controller
     {
         // Set Midtrans config
         Config::$serverKey = config('midtrans.server_key');
-        Config::$isProduction = config('midtrans.env') === 'production';
+        Config::$isProduction = (bool) config('midtrans.is_production');
         
         try {
             $notif = new Notification();

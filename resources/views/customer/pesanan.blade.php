@@ -230,6 +230,11 @@
                         <div class="card-body" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem">
                             <div>
                                 <h4 style="font-size:1rem">{{ $trx->kode_transaksi }}</h4>
+                                @if($trx->detail->count())
+                                    <p style="color:var(--text-dark);margin:0.35rem 0 0;font-size:0.9rem">
+                                        {{ $trx->detail->map(fn($d) => ($d->produk->nama_produk ?? 'Produk dihapus') . ' x' . $d->jumlah)->take(2)->implode(', ') }}@if($trx->detail->count() > 2) +{{ $trx->detail->count() - 2 }} produk @endif
+                                    </p>
+                                @endif
                                 <small style="color:var(--text-light)">{{ $trx->created_at->format('d M Y H:i') }} • {{ ucfirst($trx->tipe) }}</small>
                             </div>
                             <div style="text-align:center">
@@ -258,6 +263,11 @@
                         <div class="card-body" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem">
                             <div>
                                 <h4 style="font-size:1rem">{{ $trx->kode_transaksi }}</h4>
+                                @if($trx->detail->count())
+                                    <p style="color:var(--text-dark);margin:0.35rem 0 0;font-size:0.9rem">
+                                        {{ $trx->detail->map(fn($d) => ($d->produk->nama_produk ?? 'Produk dihapus') . ' x' . $d->jumlah)->take(2)->implode(', ') }}@if($trx->detail->count() > 2) +{{ $trx->detail->count() - 2 }} produk @endif
+                                    </p>
+                                @endif
                                 <small style="color:var(--text-light)">{{ $trx->created_at->format('d M Y H:i') }} • {{ ucfirst($trx->tipe) }}</small>
                             </div>
                             <div style="text-align:center">
@@ -294,6 +304,11 @@
                         <div class="card-body" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem">
                             <div>
                                 <h4 style="font-size:1rem">{{ $trx->kode_transaksi }}</h4>
+                                @if($trx->detail->count())
+                                    <p style="color:var(--text-dark);margin:0.35rem 0 0;font-size:0.9rem">
+                                        {{ $trx->detail->map(fn($d) => ($d->produk->nama_produk ?? 'Produk dihapus') . ' x' . $d->jumlah)->take(2)->implode(', ') }}@if($trx->detail->count() > 2) +{{ $trx->detail->count() - 2 }} produk @endif
+                                    </p>
+                                @endif
                                 <small style="color:var(--text-light)">{{ $trx->created_at->format('d M Y H:i') }} • {{ ucfirst($trx->tipe) }}</small>
                             </div>
                             <div style="text-align:center">

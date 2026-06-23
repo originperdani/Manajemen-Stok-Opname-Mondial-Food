@@ -16,7 +16,7 @@ use App\Http\Controllers\ProduksiController;
 Route::get('/test-midtrans', function () {
     try {
         \Midtrans\Config::$serverKey = config('midtrans.server_key');
-        \Midtrans\Config::$isProduction = config('midtrans.env') === 'production';
+        \Midtrans\Config::$isProduction = (bool) config('midtrans.is_production');
         \Midtrans\Config::$isSanitized = true;
         \Midtrans\Config::$is3ds = true;
 
