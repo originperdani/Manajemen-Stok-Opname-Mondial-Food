@@ -3,48 +3,28 @@
 
 @section('styles')
 <style>
-    /* ===== KATALOG HEADER (MB1 Placement + MB Styles) ===== */
-    .katalog-header {
+    .page-header {
         position: relative;
-        background: #ffffff;
         padding: 5rem 0;
-        width: 100%;
-        border-bottom: none;
+        background: #ffffff;
         text-align: center;
         overflow: hidden;
     }
 
-    .katalog-header::before {
+    .page-header::before {
         content: '';
         position: absolute;
-        top: 0;
-        bottom: 0;
-        left: -10px;
-        right: -10px;
+        inset: 0;
         background-image: 
-            /* Motif Batik Geometris Modern (Truntum Style) */
             linear-gradient(30deg, rgba(122, 75, 34, 0.015) 12%, transparent 12.5%, transparent 87%, rgba(122, 75, 34, 0.015) 87.5%, rgba(122, 75, 34, 0.015)),
             linear-gradient(150deg, rgba(122, 75, 34, 0.015) 12%, transparent 12.5%, transparent 87%, rgba(122, 75, 34, 0.015) 87.5%, rgba(122, 75, 34, 0.015)),
-            linear-gradient(30deg, rgba(122, 75, 34, 0.015) 12%, transparent 12.5%, transparent 87%, rgba(122, 75, 34, 0.015) 87.5%, rgba(122, 75, 34, 0.015)),
-            linear-gradient(150deg, rgba(122, 75, 34, 0.015) 12%, transparent 12.5%, transparent 87%, rgba(122, 75, 34, 0.015) 87.5%, rgba(122, 75, 34, 0.015)),
-            linear-gradient(60deg, rgba(199, 131, 77, 0.01) 25%, transparent 25.5%, transparent 75%, rgba(199, 131, 77, 0.01) 75%, rgba(199, 131, 77, 0.01)),
             linear-gradient(60deg, rgba(199, 131, 77, 0.01) 25%, transparent 25.5%, transparent 75%, rgba(199, 131, 77, 0.01) 75%, rgba(199, 131, 77, 0.01));
         background-size: 40px 70px;
-        background-position: center;
-        background-repeat: repeat;
         opacity: 0.8;
-        pointer-events: none;
         z-index: 0;
     }
 
-    .katalog-header h1, .katalog-header p {
-        position: relative;
-        z-index: 1;
-    }
-
-    .katalog-header h1 {
-        position: relative;
-        z-index: 1;
+    .page-header h1 {
         font-family: 'Playfair Display', serif;
         font-size: 2.5rem;
         background: linear-gradient(135deg, var(--text-dark) 0%, var(--text-dark) 30%, var(--primary) 50%, var(--accent) 70%, var(--accent) 100%);
@@ -52,11 +32,13 @@
         -webkit-text-fill-color: transparent;
         font-weight: 800;
         margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
     }
 
-    .katalog-header p {
-        color: var(--text-light);
+    .page-header p {
         font-size: 1.1rem;
+        color: var(--text-light);
         max-width: 600px;
         margin: 0 auto;
     }
@@ -99,14 +81,25 @@
 
     /* ===== FILTER HORIZONTAL (NAVIGASI) ===== */
     .filter-nav {
-        background: var(--white);
-        border-radius: 20px;
-        padding: 1.5rem;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(247, 239, 227, 0.9) 100%);
+        border-radius: 28px;
+        padding: 2rem;
         border: 1px solid var(--border);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+        box-shadow: 0 10px 40px rgba(71, 37, 16, 0.08);
         margin-bottom: 2rem;
         position: relative;
         z-index: 10;
+    }
+
+    .filter-nav::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: 
+            radial-gradient(circle at 20% 20%, rgba(243, 187, 103, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(122, 75, 34, 0.06) 0%, transparent 50%);
+        border-radius: 28px;
+        pointer-events: none;
     }
 
     .filter-nav form {
@@ -114,6 +107,8 @@
         grid-template-columns: 1fr auto auto auto;
         gap: 1.5rem;
         align-items: end;
+        position: relative;
+        z-index: 1;
     }
 
     .filter-group {
@@ -128,18 +123,39 @@
     }
 
     .cat-pill {
-        padding: 0.5rem 1.25rem;
+        padding: 0.6rem 1.5rem;
         border-radius: 999px;
-        background: var(--bg-alt);
+        background: rgba(255, 255, 255, 0.85);
         border: 1.5px solid var(--border);
         color: var(--text-medium);
-        font-weight: 500;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 0.9rem;
+    }
+
+    .cat-pill:hover {
+        background: rgba(247, 239, 227, 0.95);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(71, 37, 16, 0.1);
     }
 
     .cat-pill.active {
-        background: var(--primary);
+        background: var(--gradient-gold);
         color: white;
-        border-color: var(--primary);
+        border-color: transparent;
+        box-shadow: 0 6px 18px rgba(71, 37, 16, 0.25);
+        transform: translateY(-1px);
+    }
+
+    .sort-select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%237a4b22' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1.5rem;
+        padding-right: 3.5rem !important;
     }
 
     /* ===== PRODUCT GRID (3 KESAMPING) ===== */
@@ -165,13 +181,38 @@
     }
 
     .product-card {
-        background: var(--white);
+        background: var(--surface-soft);
         border-radius: 24px;
         overflow: hidden;
         border: 1px solid var(--border);
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         display: flex;
         flex-direction: column;
+    }
+
+    .product-footer button {
+        padding: 0.5rem 1.5rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        background: var(--gradient-gold);
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(122, 75, 34, 0.2);
+    }
+
+    .product-footer button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(122, 75, 34, 0.3);
+        background: var(--gradient-dark);
+    }
+
+    .product-footer button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 5px rgba(122, 75, 34, 0.2);
     }
 
     .product-card:hover {
@@ -182,7 +223,7 @@
 
     .product-media {
         position: relative;
-        aspect-ratio: 1/1;
+        aspect-ratio: 4/3;
         overflow: hidden;
         background: var(--bg-alt);
     }
@@ -273,27 +314,170 @@
             flex-wrap: wrap;
         }
     }
+    
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 2rem 0 1.5rem;
+        }
+        
+        .page-header h1 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-header p {
+            font-size: 0.75rem;
+            padding: 0 1rem;
+        }
+        
+        .katalog-section {
+            padding: 1.5rem 0 3rem;
+        }
+        
+        .katalog-container {
+            padding: 0 1.25rem;
+            gap: 1.5rem;
+        }
+        
+        .filter-nav {
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .filter-nav h3 {
+            font-size: 1rem;
+        }
+        
+        .cat-pill {
+            font-size: 0.8rem;
+            padding: 0.5rem 1.2rem;
+        }
+        
+        .filter-nav label {
+            font-size: 0.7rem;
+        }
+        
+        .filter-nav input,
+        .filter-nav select {
+            font-size: 0.85rem;
+            padding: 0.7rem 1.2rem;
+        }
+        
+        .filter-nav form button {
+            font-size: 0.85rem;
+            padding: 0.7rem 1.5rem;
+        }
+        
+        .product-grid {
+            gap: 1.5rem;
+        }
+        
+        .product-card {
+            border-radius: 18px;
+        }
+        
+        .product-body {
+            padding: 1.2rem;
+        }
+        
+        .product-title {
+            font-size: 1rem;
+        }
+        
+        .product-desc {
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .product-price {
+            font-size: 1.1rem;
+        }
+        
+        .product-footer button {
+            font-size: 0.8rem;
+            padding: 0.4rem 1.2rem;
+        }
+        
+        .product-card-not-found h3 {
+            font-size: 1.3rem;
+        }
+        
+        .product-card-not-found p {
+            font-size: 0.9rem;
+        }
+        
+        .product-card-not-found a {
+            font-size: 0.9rem;
+            padding: 0.75rem 1.75rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .filter-nav {
+            border-radius: 20px;
+            padding: 1.25rem;
+        }
+
+        .cat-pills {
+            gap: 0.5rem;
+        }
+
+        .cat-pill {
+            flex: 1 1 calc(50% - 0.5rem);
+            text-align: center;
+        }
+
+        .product-footer {
+            align-items: stretch;
+            flex-direction: column;
+            gap: 0.9rem;
+        }
+
+        .product-price,
+        .stok-info {
+            overflow-wrap: anywhere;
+        }
+
+        .product-footer form,
+        .product-footer button,
+        .product-footer a {
+            width: 100%;
+            text-align: center;
+        }
+    }
 </style>
 @endsection
 
 @section('content')
-<div class="katalog-header">
-    <h1>Katalog Produk</h1>
-    <p>Temukan kelezatan autentik dalam setiap pilihan roti dan kue kami yang dibuat dengan bahan premium.</p>
-</div>
+<header class="page-header">
+    <div class="container">
+        <h1 class="reveal fade-bottom">Katalog Produk</h1>
+        <p class="reveal fade-bottom delay-100">Temukan kelezatan autentik dalam setiap pilihan roti dan kue kami yang dibuat dengan bahan premium.</p>
+    </div>
+</header>
 
 <section class="katalog-section">
     <div class="katalog-container">
     <!-- Filter Nav (Horizontal) -->
-    <div class="filter-nav" data-reveal>
+    <div class="filter-nav reveal fade-bottom">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; position: relative; z-index: 1;">
+            <i class="fas fa-sliders-h" style="font-size: 1.5rem; color: var(--primary);"></i>
+            <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: var(--text-dark); font-family: 'Poppins', sans-serif;">Filter Produk</h3>
+        </div>
         <form action="{{ route('katalog') }}" method="GET" id="filterForm">
             <div class="filter-group">
-                <label style="display: block; font-weight: 600; font-size: 0.8rem; color: var(--text-dark); margin-bottom: 0.5rem; text-transform: uppercase;">Cari Produk</label>
-                <input type="text" name="search" class="search-input" style="width: 100%; padding: 0.6rem 1rem; border: 1.5px solid var(--border); border-radius: 999px; font-family: 'Poppins'; font-size: 0.9rem; background: var(--bg-alt);" placeholder="Nama roti atau kue..." value="{{ request('search') }}">
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.8rem; color: var(--text-dark); margin-bottom: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                    <i class="fas fa-search" style="font-size: 0.9rem;"></i>
+                    Cari Produk
+                </label>
+                <input type="text" name="search" class="search-input" style="width: 100%; padding: 0.85rem 1.5rem; border: 1.5px solid var(--border); border-radius: 999px; font-family: 'Poppins'; font-size: 0.95rem; background: rgba(255, 255, 255, 0.9); transition: all 0.3s ease; box-shadow: inset 0 2px 8px rgba(0,0,0,0.02);" placeholder="Nama roti atau kue..." value="{{ request('search') }}" onfocus="this.style.borderColor='var(--primary)'; this.style.boxShadow='0 0 0 4px rgba(122, 75, 34, 0.08)'; this.style.outline='none';" onblur="this.style.borderColor='var(--border)'; this.style.boxShadow='inset 0 2px 8px rgba(0,0,0,0.02)';">
             </div>
 
             <div class="filter-group">
-                <label style="display: block; font-weight: 600; font-size: 0.8rem; color: var(--text-dark); margin-bottom: 0.5rem; text-transform: uppercase;">Kategori</label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.8rem; color: var(--text-dark); margin-bottom: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                    <i class="fas fa-tags" style="font-size: 0.9rem;"></i>
+                    Kategori
+                </label>
                 <div class="cat-pills">
                     <a href="{{ route('katalog') }}" 
                        class="cat-pill {{ !request('kategori') ? 'active' : '' }}" style="text-decoration: none;">
@@ -309,15 +493,18 @@
             </div>
 
             <div class="filter-group">
-                <label style="display: block; font-weight: 600; font-size: 0.8rem; color: var(--text-dark); margin-bottom: 0.5rem; text-transform: uppercase;">Urutan</label>
-                <select name="sort" class="sort-select" style="padding: 0.6rem 1rem; border: 1.5px solid var(--border); border-radius: 999px; font-family: 'Poppins'; font-size: 0.9rem; background: var(--bg-alt); cursor: pointer;" onchange="this.form.submit()">
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.8rem; color: var(--text-dark); margin-bottom: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                    <i class="fas fa-sort" style="font-size: 0.9rem;"></i>
+                    Urutan
+                </label>
+                <select name="sort" class="sort-select" style="padding: 0.85rem 1.5rem; border: 1.5px solid var(--border); border-radius: 999px; font-family: 'Poppins'; font-size: 0.95rem; background-color: rgba(255, 255, 255, 0.9); cursor: pointer; transition: all 0.3s ease; box-shadow: inset 0 2px 8px rgba(0,0,0,0.02); width: 100%;" onchange="this.form.submit()" onfocus="this.style.borderColor='var(--primary)'; this.style.boxShadow='0 0 0 4px rgba(122, 75, 34, 0.08)'; this.style.outline='none';" onblur="this.style.borderColor='var(--border)'; this.style.boxShadow='inset 0 2px 8px rgba(0,0,0,0.02)';">
                     <option value="terbaru" {{ request('sort') == 'terbaru' ? 'selected' : '' }}>Terbaru</option>
                     <option value="harga_asc" {{ request('sort') == 'harga_asc' ? 'selected' : '' }}>Harga ↑</option>
                     <option value="harga_desc" {{ request('sort') == 'harga_desc' ? 'selected' : '' }}>Harga ↓</option>
                 </select>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.5rem; border-radius: 999px; white-space: nowrap;">Cari</button>
+            <button type="submit" class="btn btn-primary" style="padding: 0.85rem 2rem; border-radius: 999px; white-space: nowrap; background: var(--gradient-gold); color: white; font-weight: 700; font-size: 0.95rem; border: none; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 6px 20px rgba(122, 75, 34, 0.35);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 30px rgba(122, 75, 34, 0.45)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 20px rgba(122, 75, 34, 0.35)';">Cari</button>
         </form>
     </div>
 
@@ -326,7 +513,7 @@
         @if($produk->count() > 0)
             <div class="product-grid">
                 @foreach($produk as $prod)
-                    <div class="product-card reveal fade-bottom" data-reveal>
+                    <div class="product-card reveal reveal-slower fade-bottom delay-{{ ($loop->index % 3 + 1) * 100 }}">
                         <a href="{{ route('produk.detail', $prod) }}" class="product-media">
                             @if($prod->gambar)
                                 <img src="{{ str_starts_with($prod->gambar, 'http') ? $prod->gambar : asset('storage/' . $prod->gambar) }}" 
@@ -350,9 +537,17 @@
                                     <span class="product-price">Rp {{ number_format($prod->harga, 0, ',', '.') }}</span>
                                     <span class="stok-info">Tersedia: {{ $prod->stok }} {{ $prod->satuan }}</span>
                                 </div>
-                                <a href="{{ route('produk.detail', $prod) }}" class="btn btn-secondary btn-sm" title="Lihat Detail" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 10px;">
-                                    <i class="fa-solid fa-arrow-right"></i>
-                                </a>
+                                @auth
+                                    <form action="{{ route('produk.detail', $prod) }}" method="GET" style="margin: 0;">
+                                        <button type="submit">
+                                            Beli
+                                        </button>
+                                    </form>
+                                @else
+                                    <a href="{{ route('login') }}" style="padding: 0.5rem 1.5rem; border-radius: 4px; font-size: 0.875rem; font-weight: 700; text-transform: uppercase; background: var(--gradient-gold); color: white; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(122, 75, 34, 0.2); text-decoration: none; display: inline-block;">
+                                        Beli
+                                    </a>
+                                @endauth
                             </div>
                         </div>
                     </div>
@@ -364,15 +559,18 @@
                 {{ $produk->withQueryString()->links() }}
             </div> --}}
         @else
-            <div style="text-align:center; padding: 6rem 2rem; background: var(--white); border-radius: 24px; border: 1px solid var(--border);" data-reveal>
-                <div style="font-size: 4rem; color: var(--border); margin-bottom: 2rem;">
-                    <i class="fa-solid fa-magnifying-glass"></i>
+                <div class="reveal fade-bottom" style="text-align:center;padding: 6rem 2rem;background: var(--surface-soft);border-radius: 24px;border: 1px solid var(--border);">
+                    <div style="font-size: 5rem;color: var(--primary-light);margin-bottom: 2rem;">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                    <h3 style="font-size: 1.7rem;margin-bottom: 1rem;color: var(--text-dark);font-weight: 800;">Produk Tidak Ditemukan</h3>
+                    <p style="color: var(--text-light);max-width: 450px;margin: 0 auto 2.5rem;font-size: 1.05rem;">Maaf, kami tidak dapat menemukan produk yang Anda cari. Coba gunakan kata kunci lain atau reset filter.</p>
+                    <a href="{{ route('katalog') }}" style="display:inline-flex;align-items:center;justify-content:center;gap: 0.6rem;padding: 0.9rem 2rem;border-radius: 999px;background: var(--gradient-gold);color: white;text-decoration: none;font-weight: 700;font-size: 1rem;transition: all 0.3s ease;box-shadow: 0 6px 20px rgba(122, 75, 34, 0.35);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 30px rgba(122, 75, 34, 0.45)';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 6px 20px rgba(122, 75, 34, 0.35)';">
+                        <i class="fas fa-arrow-left"></i>
+                        Lihat Semua Produk
+                    </a>
                 </div>
-                <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-dark);">Produk Tidak Ditemukan</h3>
-                <p style="color: var(--text-light); max-width: 400px; margin: 0 auto 2rem;">Maaf, kami tidak dapat menemukan produk yang Anda cari. Coba gunakan kata kunci lain atau reset filter.</p>
-                <a href="{{ route('katalog') }}" class="btn btn-primary" style="border-radius: 12px;">Lihat Semua Produk</a>
-            </div>
-        @endif
+            @endif
     </div>
     </div>
 </section>

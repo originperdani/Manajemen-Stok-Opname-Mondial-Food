@@ -5,14 +5,14 @@
     /* ===== PAGE HEADER ===== */
     .checkout-header {
         background: #FDFDFC;
-        padding: 4rem 0;
+        padding: 5rem 0;
         border-bottom: 1px solid var(--border);
         text-align: center;
         margin-bottom: 4rem;
     }
     .checkout-header h1 {
         font-family: 'Playfair Display', serif;
-        font-size: 2.75rem;
+        font-size: 2.5rem;
         background: linear-gradient(135deg, var(--text-dark) 0%, var(--text-dark) 30%, var(--primary) 50%, var(--accent) 70%, var(--accent) 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -22,6 +22,10 @@
         align-items: center;
         justify-content: center;
         gap: 1rem;
+    }
+    .checkout-header p {
+        color: var(--text-light);
+        font-size: 1.1rem;
     }
 
     /* ===== PREMIUM CHECKOUT BUTTON ===== */
@@ -140,6 +144,25 @@
         background: white;
         box-shadow: 0 0 0 4px rgba(139, 105, 20, 0.1);
     }
+    .checkout-input:invalid, .checkout-textarea:invalid {
+        border-color: #dc2626;
+    }
+    .checkout-input:invalid:focus, .checkout-textarea:invalid:focus {
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+    }
+    .form-group, .form-group-full {
+        position: relative;
+    }
+    .error-message {
+        color: #dc2626;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: none;
+        font-weight: 500;
+    }
+    .form-group .error-message.show, .form-group-full .error-message.show {
+        display: block;
+    }
     .checkout-label {
         display: block;
         font-weight: 600;
@@ -163,19 +186,19 @@
         opacity: 0;
     }
     .option-content {
-        padding: 1.25rem;
-        border: 1.5px solid var(--border);
-        border-radius: 16px;
+        padding: 1.5rem;
+        border: 2px solid var(--border);
+        border-radius: 20px;
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
         transition: all 0.3s ease;
-        background: #F9FAFB;
+        background: var(--surface-soft);
     }
     .option-card input:checked + .option-content {
         border-color: var(--primary);
-        background: var(--bg-cream);
-        box-shadow: 0 4px 15px rgba(139, 105, 20, 0.08);
+        background: var(--surface-soft);
+        box-shadow: 0 6px 20px rgba(122, 75, 34, 0.15);
     }
     .option-title { font-weight: 700; color: var(--text-dark); font-size: 0.95rem; }
     .option-desc { font-size: 0.8rem; color: var(--text-light); }
@@ -222,12 +245,125 @@
     .grand-total-label { font-weight: 800; font-size: 1.125rem; color: var(--text-dark); }
     .grand-total-value { font-weight: 800; font-size: 1.75rem; color: var(--primary); }
 
-    @media (max-width: 991px) {
-        .checkout-grid { grid-template-columns: 1fr; }
-        .order-summary { position: static; }
-        .form-grid { grid-template-columns: 1fr; }
-        .form-group-full { grid-column: auto; }
-        .options-grid { grid-template-columns: 1fr; }
+    @media (max-width: 1024px) {
+        .checkout-grid {
+            grid-template-columns: 1fr;
+            max-width: 820px;
+            gap: 2rem;
+        }
+
+        .order-summary {
+            position: static;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .checkout-header {
+            padding: 3rem 0 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .checkout-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .checkout-header p {
+            font-size: 0.9rem;
+            padding: 0 1rem;
+        }
+        
+        .checkout-grid {
+            grid-template-columns: 1fr;
+            padding: 0 1.25rem 3rem;
+            gap: 2rem;
+        }
+        
+        .checkout-section {
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .form-group-full {
+            grid-column: auto;
+        }
+        
+        .options-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .order-summary {
+            padding: 1.5rem;
+            position: static;
+        }
+        
+        .grand-total-value {
+            font-size: 1.4rem;
+        }
+        
+        .btn-checkout-premium {
+            height: 50px;
+            font-size: 0.95rem;
+            margin-top: 1.5rem;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .checkout-header h1 {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            font-size: 1.6rem;
+        }
+
+        .checkout-section,
+        .order-summary {
+            border-radius: 18px;
+            padding: 1.25rem;
+        }
+
+        .section-title {
+            align-items: flex-start;
+            line-height: 1.35;
+        }
+
+        .option-content {
+            min-height: auto !important;
+            padding: 1.2rem;
+        }
+
+        .order-item {
+            gap: 0.75rem;
+        }
+
+        .item-name,
+        .item-meta {
+            overflow-wrap: anywhere;
+        }
+
+        .item-price {
+            white-space: nowrap;
+        }
+
+        .grand-total {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .grand-total-value {
+            font-size: 1.25rem;
+            overflow-wrap: anywhere;
+        }
     }
 </style>
 @endsection
@@ -241,8 +377,23 @@
 </header>
 
 <div class="container">
-    <form method="POST" action="{{ route('customer.checkout.proses') }}">
+    <form id="checkout-form" method="POST" action="{{ route('customer.checkout.proses') }}">
         @csrf
+        @if ($errors->any())
+            <div class="checkout-section">
+                <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                        <i class="fa-solid fa-circle-exclamation" style="color: #dc2626; font-size: 1.2rem;"></i>
+                        <h4 style="margin: 0; color: #991b1b; font-size: 1rem;">Harap lengkapi data berikut:</h4>
+                    </div>
+                    <ul style="margin: 0; padding-left: 1.25rem; color: #991b1b;">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        @endif
         <div class="checkout-grid">
             <main>
                 <!-- Data Pemesan -->
@@ -251,15 +402,23 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="checkout-label">Nama Lengkap *</label>
-                            <input type="text" name="nama_pelanggan" class="checkout-input" value="{{ auth()->user()->name }}" required placeholder="Masukkan nama penerima">
+                            <input type="text" name="nama_pelanggan" class="checkout-input" value="{{ auth()->user()->name }}" required placeholder="Masukkan nama penerima" oninvalid="this.setCustomValidity('Harap masukkan nama lengkap Anda')" oninput="this.setCustomValidity('')">
+                            <div class="error-message" id="error-nama_pelanggan">Harap masukkan nama lengkap Anda</div>
                         </div>
                         <div class="form-group">
                             <label class="checkout-label">No. Telepon / WhatsApp *</label>
-                            <input type="text" name="phone_pelanggan" class="checkout-input" value="{{ auth()->user()->phone }}" required placeholder="Contoh: 08123456789">
+                            <input type="text" name="phone_pelanggan" class="checkout-input" value="{{ auth()->user()->phone }}" required placeholder="Contoh: 08123456789" oninvalid="this.setCustomValidity('Harap masukkan nomor telepon/WhatsApp Anda')" oninput="this.setCustomValidity('')">
+                            <div class="error-message" id="error-phone_pelanggan">Harap masukkan nomor telepon/WhatsApp Anda</div>
                         </div>
                         <div class="form-group-full">
-                            <label class="checkout-label">Alamat Lengkap Pengiriman *</label>
-                            <textarea name="alamat_pengiriman" class="checkout-textarea" rows="3" required placeholder="Nama jalan, nomor rumah, kelurahan, kecamatan, kota">{{ auth()->user()->alamat }}</textarea>
+                            <label class="checkout-label">Email *</label>
+                            <input type="email" name="email_pelanggan" class="checkout-input" value="{{ auth()->user()->email }}" required placeholder="Masukkan email Anda" oninvalid="this.setCustomValidity('Harap masukkan email Anda yang valid')" oninput="this.setCustomValidity('')">
+                            <div class="error-message" id="error-email_pelanggan">Harap masukkan email Anda yang valid</div>
+                        </div>
+                        <div class="form-group-full">
+                            <label class="checkout-label" for="alamat_pengiriman">Alamat Lengkap Pengiriman *</label>
+                            <textarea id="alamat_pengiriman" name="alamat_pengiriman" class="checkout-textarea" rows="3" required placeholder="Nama jalan, nomor rumah, kelurahan, kecamatan, kota" oninvalid="this.setCustomValidity('Harap masukkan alamat lengkap Anda')" oninput="this.setCustomValidity('')">{{ auth()->user()->alamat }}</textarea>
+                            <div class="error-message" id="error-alamat_pengiriman">Harap masukkan alamat lengkap Anda</div>
                         </div>
                         <div class="form-group-full">
                             <label class="checkout-label">Catatan Pesanan (Opsional)</label>
@@ -273,16 +432,17 @@
                     <h3 class="section-title"><i class="fa-solid fa-truck-fast"></i> Metode Pengiriman</h3>
                     <div class="options-grid">
                         @foreach([
-                            'ambil_sendiri' => ['🏪', 'Ambil Sendiri', 'Ambil pesanan langsung di toko'],
-                            'kurir_toko' => ['🚗', 'Kurir Toko', 'Pengiriman aman oleh kurir kami (+Rp10.000)'],
-                            'grabfood' => ['🟢', 'GrabFood', 'Pengiriman via layanan GrabFood (+Rp10.000)'],
-                            'gofood' => ['🔴', 'GoFood', 'Pengiriman via layanan GoFood (+Rp10.000)']
+                            'ambil_sendiri' => ['fa-store', 'Ambil Sendiri', 'Ambil pesanan langsung di toko'],
+                            'kurir_ojol' => ['fa-motorcycle', 'Kurir Toko / Ojek Online', 'Pengiriman oleh kurir kami atau ojek online']
                         ] as $val => $info)
                             <label class="option-card">
-                                <input type="radio" name="metode_kirim" value="{{ $val }}" {{ $loop->first ? 'checked' : '' }}>
-                                <div class="option-content">
-                                    <div style="font-size: 1.5rem;">{{ $info[0] }}</div>
-                                    <div class="option-title">{{ $info[1] }}</div>
+                                <input type="radio" name="metode_kirim" value="{{ $val }}" {{ $loop->first ? 'checked' : '' }} onchange="updateOngkir()">
+                                <div class="option-content" style="position: relative; min-height: 180px; display: flex; flex-direction: column; justify-content: center;">
+                                    @if($val === 'kurir_ojol')
+                                        <span style="display: inline-block; margin-bottom: 0.75rem; background: rgba(122, 75, 34, 0.1); color: var(--primary); padding: 0.4rem 1rem; border-radius: 50px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; width: fit-content;">Bayar Ongkir COD</span>
+                                    @endif
+                                    <div style="font-size: 2rem; color: var(--primary);"><i class="fas {{ $info[0] }}"></i></div>
+                                    <div class="option-title" style="font-size: 1.05rem;">{{ $info[1] }}</div>
                                     <div class="option-desc">{{ $info[2] }}</div>
                                 </div>
                             </label>
@@ -293,22 +453,15 @@
                 <!-- Metode Pembayaran -->
                 <div class="checkout-section">
                     <h3 class="section-title"><i class="fa-solid fa-wallet"></i> Metode Pembayaran</h3>
-                    <div class="options-grid">
-                        @foreach([
-                            'qris' => ['📱', 'QRIS', 'Scan kode QR untuk pembayaran instan'],
-                            'e_wallet' => ['💰', 'E-Wallet', 'OVO, GoPay, Dana, LinkAja'],
-                            'm_banking' => ['🏦', 'Transfer Bank', 'BCA, Mandiri, BNI, BRI'],
-                            'bayar_ditempat' => ['💵', 'Bayar di Tempat', 'Bayar saat pesanan sampai (COD)']
-                        ] as $val => $info)
-                            <label class="option-card">
-                                <input type="radio" name="metode_bayar" value="{{ $val }}" {{ $loop->first ? 'checked' : '' }}>
-                                <div class="option-content">
-                                    <div style="font-size: 1.5rem;">{{ $info[0] }}</div>
-                                    <div class="option-title">{{ $info[1] }}</div>
-                                    <div class="option-desc">{{ $info[2] }}</div>
-                                </div>
-                            </label>
-                        @endforeach
+                    <div class="options-grid" id="metode-bayar-container">
+                        <label class="option-card metode-bayar-option">
+                            <input type="hidden" name="metode_bayar" value="midtrans">
+                            <div class="option-content">
+                                <div style="font-size: 1.8rem; color: var(--primary);"><i class="fas fa-credit-card"></i></div>
+                                <div class="option-title">Pembayaran Online</div>
+                                <div class="option-desc">QRIS, Transfer Bank, E-Wallet (diproses oleh Midtrans)</div>
+                            </div>
+                        </label>
                     </div>
                 </div>
             </main>
@@ -360,13 +513,145 @@
 @endsection
 
 @section('scripts')
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
 <script>
 const subtotal = {{ $total }};
-document.querySelectorAll('input[name="metode_kirim"]').forEach(r => {
-    r.addEventListener('change', function() {
-        const ongkir = this.value === 'ambil_sendiri' ? 0 : 10000;
-        document.getElementById('ongkir-display').textContent = 'Rp ' + ongkir.toLocaleString('id-ID');
-        document.getElementById('total-display').textContent = 'Rp ' + (subtotal + ongkir).toLocaleString('id-ID');
+const alamatToko = 'Mondial Bakery, Jl. Mesjid Al-Akhyar No.34, Gandul, Cinere, Depok City, West Java 16512';
+
+function updateOngkir() {
+    const ongkir = 0;
+    document.getElementById('ongkir-display').textContent = 'Rp ' + ongkir.toLocaleString('id-ID');
+    document.getElementById('total-display').textContent = 'Rp ' + (subtotal + ongkir).toLocaleString('id-ID');
+}
+
+function updateAlamat() {
+    const metodeKirim = document.querySelector('input[name="metode_kirim"]:checked').value;
+    const alamatTextarea = document.querySelector('textarea[name="alamat_pengiriman"]');
+    const alamatLabel = document.querySelector('label[for="alamat_pengiriman"]') || document.querySelector('textarea[name="alamat_pengiriman"]').previousElementSibling;
+    
+    if (metodeKirim === 'ambil_sendiri') {
+        alamatLabel.textContent = 'Alamat Pengambilan';
+        alamatTextarea.value = alamatToko;
+        alamatTextarea.disabled = true;
+        alamatTextarea.style.backgroundColor = '#F3F4F6';
+        alamatTextarea.style.cursor = 'not-allowed';
+    } else {
+        alamatLabel.textContent = 'Alamat Lengkap Pengiriman *';
+        alamatTextarea.value = '';
+        alamatTextarea.disabled = false;
+        alamatTextarea.style.backgroundColor = '#F9FAFB';
+        alamatTextarea.style.cursor = 'text';
+    }
+}
+
+function validateForm() {
+    let isValid = true;
+    const fields = ['nama_pelanggan', 'phone_pelanggan', 'email_pelanggan', 'alamat_pengiriman'];
+    
+    fields.forEach(field => {
+        const input = document.querySelector(`[name="${field}"]`);
+        const errorMsg = document.getElementById(`error-${field}`);
+        
+        if (!input.value.trim()) {
+            input.classList.add('invalid');
+            errorMsg.classList.add('show');
+            isValid = false;
+        } else {
+            input.classList.remove('invalid');
+            errorMsg.classList.remove('show');
+        }
+        
+        if (field === 'email_pelanggan' && input.value.trim()) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(input.value.trim())) {
+                input.classList.add('invalid');
+                errorMsg.textContent = 'Harap masukkan email yang valid';
+                errorMsg.classList.add('show');
+                isValid = false;
+            }
+        }
+    });
+    
+    return isValid;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateOngkir();
+    updateAlamat();
+    
+    document.querySelectorAll('input[name="metode_kirim"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            updateAlamat();
+        });
+    });
+    
+    const fields = ['nama_pelanggan', 'phone_pelanggan', 'email_pelanggan', 'alamat_pengiriman'];
+    fields.forEach(field => {
+        const input = document.querySelector(`[name="${field}"]`);
+        input.addEventListener('input', function() {
+            const errorMsg = document.getElementById(`error-${field}`);
+            if (this.value.trim()) {
+                this.classList.remove('invalid');
+                errorMsg.classList.remove('show');
+            }
+        });
+    });
+    
+    document.getElementById('checkout-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        document.getElementById('alamat_pengiriman').disabled = false;
+        
+        if (!validateForm()) {
+            const firstError = document.querySelector('.error-message.show');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return;
+        }
+        
+        const submitBtn = document.querySelector('.btn-checkout-premium');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+        
+        try {
+            const formData = new FormData(this);
+            const response = await fetch('{{ route('customer.checkout.proses') }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success && data.snap_token) {
+                snap.pay(data.snap_token, {
+                            onSuccess: function(result) {
+                                // Refresh pesanan list to show updated status
+                                window.location.href = '{{ route('customer.pesanan') }}?payment=success';
+                            },
+                            onPending: function(result) {
+                                window.location.href = '{{ route('customer.pesanan') }}?payment=pending';
+                            },
+                            onError: function(result) {
+                                window.location.href = '{{ route('customer.pesanan') }}?payment=error';
+                            },
+                            onClose: function() {
+                                window.location.href = '{{ route('customer.pesanan') }}';
+                            }
+                        });
+            } else {
+                alert(data.message || 'Terjadi kesalahan. Silakan coba lagi.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Konfirmasi Pesanan <i class="fa-solid fa-circle-check"></i>';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan. Silakan coba lagi.');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Konfirmasi Pesanan <i class="fa-solid fa-circle-check"></i>';
+        }
     });
 });
 </script>

@@ -13,35 +13,42 @@
 @endsection
 
 @section('content')
-<form method="GET" class="d-flex gap-1 mb-3">
-    <select name="status" class="form-control" style="width:150px" onchange="this.form.submit()">
-        <option value="">Semua Status</option>
-        @foreach(['pending','diproses','dikirim','selesai','dibatalkan'] as $s)
-            <option value="{{ $s }}" {{ request('status')==$s?'selected':'' }}>{{ ucfirst($s) }}</option>
-        @endforeach
-    </select>
-    <input type="date" name="dari" class="form-control" style="width:160px" value="{{ request('dari') }}">
-    <input type="date" name="sampai" class="form-control" style="width:160px" value="{{ request('sampai') }}">
-    <button class="btn btn-primary"><i class="fas fa-filter"></i> Filter</button>
-</form>
+<div class="action-header" style="border-left: 5px solid var(--primary);">
+    <form method="GET" class="d-flex gap-1" style="flex: 1; flex-wrap: wrap">
+        <select name="status" class="form-control" style="width:150px" onchange="this.form.submit()">
+            <option value="">Semua Status</option>
+            @foreach(['belum_bayar','pending','diproses','dikirim','selesai','dibatalkan'] as $s)
+                <option value="{{ $s }}" {{ request('status')==$s?'selected':'' }}>{{ ucfirst(str_replace('_',' ', $s)) }}</option>
+            @endforeach
+        </select>
+        <input type="date" name="tanggal" class="form-control" style="width:160px" value="{{ request('tanggal') }}">
+        <button class="btn btn-primary">Filter</button>
+    </form>
+</div>
 
-<div class="card">
+<div class="card" style="border-left: 5px solid var(--primary);">
     <div class="table-responsive"><table>
-        <thead><tr><th>Kode</th><th>Customer</th><th>Tipe</th><th>Total</th><th>Pembayaran</th><th>Status</th><th>Tanggal</th></tr></thead>
+        <thead><tr><th>Kode</th><th>Customer</th><th>Tipe</th><th>Total</th><th>Pembayaran</th><th style="text-align:center">Status</th><th>Tanggal</th></tr></thead>
         <tbody>
             @foreach($transaksi as $t)
+            @php
+                $isPickup = $t->pengiriman && in_array($t->pengiriman->metode_kirim, ['ambil_sendiri']);
+                $displayStatus = $t->status;
+                if ($isPickup && $t->status === 'dikirim') {
+                    $displayStatus = 'siap diambil';
+                }
+            @endphp
             <tr>
                 <td><strong>{{ $t->kode_transaksi }}</strong></td>
                 <td>{{ $t->user->name ?? $t->nama_pelanggan ?? 'Walk-in' }}</td>
                 <td><span class="badge badge-{{ $t->tipe=='pos'?'info':'primary' }}">{{ strtoupper($t->tipe) }}</span></td>
                 <td style="font-weight:600">Rp {{ number_format($t->total, 0, ',', '.') }}</td>
                 <td>{{ $t->pembayaran->metode_label ?? '-' }}</td>
-                <td><span class="badge badge-{{ match($t->status) { 'selesai'=>'success','pending'=>'warning','dibatalkan'=>'danger',default=>'info' } }}">{{ ucfirst($t->status) }}</span></td>
+                <td style="text-align:center"><span class="badge badge-{{ match($t->status) { 'selesai'=>'success','pending'=>'warning','belum_bayar'=>'danger','dibatalkan'=>'danger',default=>'info' } }}">{{ ucfirst(str_replace('_',' ', $displayStatus)) }}</span></td>
                 <td>{{ $t->created_at->format('d/m/Y H:i') }}</td>
             </tr>
             @endforeach
         </tbody>
     </table></div>
 </div>
-{{ $transaksi->withQueryString()->links() }}
 @endsection

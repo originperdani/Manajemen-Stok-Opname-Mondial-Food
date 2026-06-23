@@ -10,9 +10,13 @@ use App\Models\DetailTransaksi;
 use App\Models\Pembayaran;
 use App\Models\Pengiriman;
 use App\Models\StokLog;
+use App\Helpers\CacheHelper;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Midtrans\Snap;
+use Midtrans\Config;
 
 class CustomerController extends Controller
 {
@@ -193,19 +197,24 @@ class CustomerController extends Controller
         $request->validate([
             'nama_pelanggan' => 'required|string',
             'phone_pelanggan' => 'required|string',
-            'metode_bayar' => 'required|in:qris,e_wallet,m_banking,bayar_ditempat',
-            'metode_kirim' => 'required|in:ambil_sendiri,kurir_toko,grabfood,gofood',
+            'email_pelanggan' => 'required|email',
+            'metode_kirim' => 'required|in:ambil_sendiri,kurir_ojol',
+        ], [
+            'nama_pelanggan.required' => 'Nama lengkap harus diisi',
+            'phone_pelanggan.required' => 'Nomor telepon/WhatsApp harus diisi',
+            'email_pelanggan.required' => 'Email harus diisi',
+            'email_pelanggan.email' => 'Email harus valid',
         ]);
 
         $items = Keranjang::where('user_id', auth()->id())->with('produk')->get();
         if ($items->isEmpty()) {
-            return back()->with('error', 'Keranjang kosong!');
+            return response()->json(['success' => false, 'message' => 'Keranjang kosong!'], 400);
         }
 
         DB::beginTransaction();
         try {
             $subtotal = $items->sum(fn($item) => $item->jumlah * $item->produk->harga);
-            $ongkir = in_array($request->metode_kirim, ['kurir_toko', 'grabfood', 'gofood']) ? 10000 : 0;
+            $ongkir = 0;
 
             $transaksi = Transaksi::create([
                 'kode_transaksi' => Transaksi::generateKode(),
@@ -214,9 +223,10 @@ class CustomerController extends Controller
                 'subtotal' => $subtotal,
                 'ongkir' => $ongkir,
                 'total' => $subtotal + $ongkir,
-                'status' => 'pending',
+                'status' => 'belum_bayar',
                 'nama_pelanggan' => $request->nama_pelanggan,
                 'phone_pelanggan' => $request->phone_pelanggan,
+                'email_pelanggan' => $request->email_pelanggan,
                 'alamat_pengiriman' => $request->alamat_pengiriman,
                 'catatan' => $request->catatan,
             ]);
@@ -229,28 +239,13 @@ class CustomerController extends Controller
                     'harga_satuan' => $item->produk->harga,
                     'subtotal' => $item->jumlah * $item->produk->harga,
                 ]);
-
-                $stokSebelum = $item->produk->stok;
-                $item->produk->decrement('stok', $item->jumlah);
-
-                StokLog::create([
-                    'tipe' => 'produk',
-                    'referensi_id' => $item->produk->id,
-                    'jenis' => 'keluar',
-                    'jumlah' => $item->jumlah,
-                    'stok_sebelum' => $stokSebelum,
-                    'stok_sesudah' => $item->produk->stok,
-                    'keterangan' => 'Pesanan Online #' . $transaksi->kode_transaksi,
-                    'user_id' => auth()->id(),
-                ]);
             }
 
             Pembayaran::create([
                 'transaksi_id' => $transaksi->id,
-                'metode' => $request->metode_bayar,
+                'metode' => 'midtrans',
                 'jumlah_bayar' => $subtotal + $ongkir,
-                'status' => $request->metode_bayar === 'bayar_ditempat' ? 'pending' : 'berhasil',
-                'tanggal_bayar' => $request->metode_bayar !== 'bayar_ditempat' ? now() : null,
+                'status' => 'belum_bayar',
             ]);
 
             Pengiriman::create([
@@ -264,25 +259,262 @@ class CustomerController extends Controller
 
             Keranjang::where('user_id', auth()->id())->delete();
 
+            CacheHelper::bumpVersion('produk');
             DB::commit();
-            return redirect()->route('customer.pesanan.detail', $transaksi)->with('success', 'Pesanan berhasil dibuat!');
+            
+            // Generate Snap Token Midtrans
+            $snapToken = $this->generateSnapToken($transaksi);
+            
+            return response()->json([
+                'success' => true,
+                'snap_token' => $snapToken,
+                'transaksi_id' => $transaksi->id
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Gagal memproses pesanan: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal memproses pesanan: ' . $e->getMessage()], 500);
+        }
+    }
+    
+    private function generateSnapToken(Transaksi $transaksi)
+    {
+        try {
+            // Konfigurasi Midtrans
+            Config::$serverKey = config('midtrans.server_key');
+            Config::$isProduction = config('midtrans.env') === 'production';
+            Config::$isSanitized = true;
+            Config::$is3ds = true;
+            
+            // Use kode_transaksi with retry suffix to avoid Midtrans duplicate order_id rejection
+            $orderId = $transaksi->kode_transaksi;
+            $pembayaran = $transaksi->pembayaran;
+            
+            // If there's an existing referensi with retry suffix, increment it
+            if ($pembayaran && $pembayaran->referensi && preg_match('/-R(\d+)$/', $pembayaran->referensi, $matches)) {
+                $retryCount = (int) $matches[1] + 1;
+                $orderId = $transaksi->kode_transaksi . '-R' . $retryCount;
+            } elseif ($pembayaran && $pembayaran->status !== 'berhasil') {
+                // First retry — check if original order_id was already used by trying with suffix
+                // This handles the case where the first checkout created an order in Midtrans
+                // but the customer didn't complete payment and is now retrying
+                $orderId = $transaksi->kode_transaksi . '-R1';
+            }
+            
+            // Prepare transaction details
+            $transaction_details = [
+                'order_id' => $orderId,
+                'gross_amount' => (int) $transaksi->total,
+            ];
+            
+            // Prepare customer details
+            $customer_details = [
+                'first_name' => $transaksi->nama_pelanggan,
+                'email' => $transaksi->email_pelanggan,
+                'phone' => $transaksi->phone_pelanggan,
+            ];
+            
+            // Prepare item details
+            $item_details = [];
+            foreach ($transaksi->detail as $item) {
+                $item_details[] = [
+                    'id' => (string) $item->produk->id,
+                    'price' => (int) $item->harga_satuan,
+                    'quantity' => $item->jumlah,
+                    'name' => $item->produk->nama_produk,
+                ];
+            }
+            
+            // Combine all parameters
+            $params = [
+                'transaction_details' => $transaction_details,
+                'customer_details' => $customer_details,
+                'item_details' => $item_details,
+            ];
+            
+            \Log::info('Midtrans Params:', $params);
+            
+            $snapToken = Snap::getSnapToken($params);
+            
+            \Log::info('Midtrans Snap Token:', ['token' => $snapToken]);
+            
+            // Save the order_id used so webhook can map back to transaction
+            if ($pembayaran) {
+                $pembayaran->update(['referensi' => $orderId]);
+            }
+            
+            return $snapToken;
+        } catch (\Exception $e) {
+            \Log::error('Midtrans Error:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
+        }
+    }
+    
+    public function getSnapToken(Transaksi $transaksi)
+    {
+        if ($transaksi->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        try {
+            $snapToken = $this->generateSnapToken($transaksi);
+            return response()->json([
+                'snap_token' => $snapToken
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Midtrans Snap Token Error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
     public function pesanan()
     {
-        $pesanan = Transaksi::where('user_id', auth()->id())->with('pembayaran', 'pengiriman')->latest()->paginate(10);
+        $pesananQuery = Transaksi::where('user_id', auth()->id())
+            ->with('pembayaran', 'pengiriman')
+            ->latest();
+        
+        $pesanan = $pesananQuery->paginate(10);
+        
+        // Check and update status for recent orders (last 24 hours)
+        foreach ($pesanan as $transaksi) {
+            if ($transaksi->pembayaran && 
+                $transaksi->pembayaran->metode === 'midtrans' && 
+                in_array($transaksi->pembayaran->status, ['belum_bayar', 'pending']) &&
+                $transaksi->created_at->gt(now()->subHours(24))) {
+                $this->checkAndUpdateMidtransStatus($transaksi);
+            }
+        }
+        
+        // Refresh the data after updates
+        $pesanan = $pesananQuery->paginate(10);
+        
         return view('customer.pesanan', compact('pesanan'));
     }
 
     public function pesananDetail(Transaksi $transaksi)
     {
         if ($transaksi->user_id !== auth()->id()) { abort(403); }
+        
+        // Check and update status from Midtrans if needed
+        if ($transaksi->pembayaran && 
+            $transaksi->pembayaran->metode === 'midtrans' && 
+            in_array($transaksi->pembayaran->status, ['belum_bayar', 'pending'])) {
+            $this->checkAndUpdateMidtransStatus($transaksi);
+        }
+        
         $transaksi->load('detail.produk', 'pembayaran', 'pengiriman');
         return view('customer.pesanan-detail', compact('transaksi'));
+    }
+    
+    private function checkAndUpdateMidtransStatus(Transaksi $transaksi): void
+    {
+        try {
+            Config::$serverKey = config('midtrans.server_key');
+            Config::$isProduction = config('midtrans.env') === 'production';
+            
+            // Use the stored referensi (which includes retry suffix) or fallback to kode_transaksi
+            $midtransOrderId = $transaksi->pembayaran->referensi ?? $transaksi->kode_transaksi;
+            
+            // Get transaction status from Midtrans
+            $status = \Midtrans\Transaction::status($midtransOrderId);
+            
+            $transactionStatus = $status->transaction_status;
+            $fraudStatus = $status->fraud_status ?? null;
+            $pembayaran = $transaksi->pembayaran;
+            
+            if (!$pembayaran) return;
+            
+            if ($transactionStatus == 'capture' && $fraudStatus == 'accept') {
+                $this->updatePaymentSuccess($transaksi, $pembayaran, $status);
+            } elseif ($transactionStatus == 'settlement') {
+                $this->updatePaymentSuccess($transaksi, $pembayaran, $status);
+            } elseif (in_array($transactionStatus, ['deny', 'expire', 'cancel'])) {
+                $pembayaran->update(['status' => 'gagal', 'tanggal_bayar' => null]);
+                $transaksi->update(['status' => 'dibatalkan']);
+            }
+        } catch (\Exception $e) {
+            // Ignore errors, just continue
+        }
+    }
+    
+    private function updatePaymentSuccess(Transaksi $transaksi, $pembayaran, $midtransResponse = null): void
+    {
+        $updateData = ['status' => 'berhasil', 'tanggal_bayar' => now()];
+        
+        // Extract actual payment method from Midtrans response
+        if ($midtransResponse) {
+            $actualMetode = Pembayaran::extractMidtransPaymentMethod($midtransResponse);
+            $updateData['metode'] = $actualMetode;
+        }
+        
+        $pembayaran->update($updateData);
+        $transaksi->update(['status' => 'pending']);
+
+        // Kurangi stok
+        foreach ($transaksi->detail as $item) {
+            $produk = $item->produk;
+            if ($produk) {
+                $stokSebelum = $produk->stok;
+                $produk->decrement('stok', $item->jumlah);
+
+                \App\Models\StokLog::create([
+                    'tipe' => 'produk',
+                    'referensi_id' => $produk->id,
+                    'jenis' => 'keluar',
+                    'jumlah' => $item->jumlah,
+                    'stok_sebelum' => $stokSebelum,
+                    'stok_sesudah' => $produk->stok,
+                    'keterangan' => 'Pesanan Online #' . $transaksi->kode_transaksi,
+                    'user_id' => $transaksi->user_id,
+                ]);
+            }
+        }
+
+        // Bump cache version so product stock updates show on katalog/home
+        \App\Helpers\CacheHelper::bumpVersion('produk');
+    }
+
+    public function lihatStruk(Transaksi $transaksi)
+    {
+        return $this->renderStrukPesanan($transaksi, false);
+    }
+
+    public function downloadStruk(Transaksi $transaksi)
+    {
+        return $this->renderStrukPesanan($transaksi, true);
+    }
+
+    private function renderStrukPesanan(Transaksi $transaksi, bool $download)
+    {
+        if ($transaksi->user_id !== auth()->id()) { abort(403); }
+
+        $transaksi->loadMissing('detail.produk', 'pembayaran', 'pengiriman', 'user');
+
+        abort_unless($transaksi->pembayaran, 404, 'Data pembayaran pesanan tidak ditemukan.');
+
+        $store = [
+            'name' => 'Mondial Bakery',
+            'address' => 'Jl. Mesjid Al-Akhyar No.34, Gandul, Kec. Cinere, Kota Depok, Jawa Barat 16512',
+            'phone' => '0857-9393-0723',
+            'email' => 'mondialfood.co@gmail.com',
+        ];
+
+        $filename = 'struk-' . $transaksi->kode_transaksi . '.pdf';
+        $pdf = Pdf::loadView('customer.struk-pesanan', [
+            'transaksi' => $transaksi,
+            'store' => $store,
+        ])->setPaper([0, 0, 226.77, 620], 'portrait');
+
+        $response = $download
+            ? $pdf->download($filename)
+            : $pdf->stream($filename);
+
+        return $response
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 
     private function cacheVersion(string $namespace): int

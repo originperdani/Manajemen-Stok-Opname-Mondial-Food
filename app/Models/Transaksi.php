@@ -10,7 +10,7 @@ class Transaksi extends Model
     protected $fillable = [
         'kode_transaksi', 'user_id', 'kasir_id', 'tipe', 'subtotal', 'diskon',
         'ongkir', 'total', 'status', 'catatan', 'nama_pelanggan',
-        'phone_pelanggan', 'alamat_pengiriman',
+        'phone_pelanggan', 'email_pelanggan', 'alamat_pengiriman',
     ];
     protected $casts = ['subtotal' => 'decimal:2', 'diskon' => 'decimal:2', 'ongkir' => 'decimal:2', 'total' => 'decimal:2'];
 

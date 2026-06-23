@@ -13,15 +13,15 @@
 @endsection
 
 @section('content')
-<div class="action-header">
+<div class="action-header" style="border-left: 5px solid var(--primary);">
     <form method="GET" class="d-flex gap-1" style="flex: 1; flex-wrap: wrap;">
         <input type="text" name="search" class="form-control" placeholder="Cari produk..." value="{{ request('search') }}" style="width:250px">
-        <button class="btn btn-primary"><i class="fas fa-search"></i> Cari</button>
+        <button class="btn btn-primary">Cari</button>
     </form>
 </div>
 
-<div class="card">
-    <div class="card-header"><h3>🍰 Stok Produk / Kue</h3></div>
+<div class="card" style="border-left: 5px solid var(--primary);">
+    <div class="card-header"><h3>Stok Produk / Kue</h3></div>
     <div class="table-responsive"><table>
         <thead><tr><th>Produk</th><th>Kategori</th><th>Stok</th><th>Min</th><th>Harga</th><th>Status</th></tr></thead>
         <tbody>
@@ -34,7 +34,7 @@
                 <td>Rp {{ number_format($p->harga, 0, ',', '.') }}</td>
                 <td>
                     @if($p->stok <= 0)<span class="badge badge-danger">Habis</span>
-                    @elseif($p->stok <= $p->stok_minimum)<span class="badge badge-warning">⚠ Menipis</span>
+                    @elseif($p->stok <= $p->stok_minimum)<span class="badge badge-warning">Menipis</span>
                     @else<span class="badge badge-success">Aman</span>@endif
                 </td>
             </tr>

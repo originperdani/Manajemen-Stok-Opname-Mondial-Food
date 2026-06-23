@@ -132,11 +132,11 @@ return new class extends Migration
         Schema::create('pengiriman', function (Blueprint $table) {
             $table->id();
             $table->foreignId('transaksi_id')->constrained('transaksi')->onDelete('cascade');
-            $table->enum('metode_kirim', ['ambil_sendiri', 'kurir_toko', 'grabfood', 'gofood'])->default('ambil_sendiri');
+            $table->enum('metode_kirim', ['ambil_sendiri', 'kurir_toko', 'kurir_ojol', 'grabfood', 'gofood'])->default('ambil_sendiri');
             $table->text('alamat_tujuan')->nullable();
             $table->string('nama_penerima')->nullable();
             $table->string('phone_penerima')->nullable();
-            $table->enum('status', ['menunggu', 'diproses', 'dikirim', 'diterima'])->default('menunggu');
+            $table->enum('status', ['menunggu', 'diproses', 'dikirim', 'siap_diambil', 'diterima'])->default('menunggu');
             $table->string('no_resi')->nullable();
             $table->text('catatan')->nullable();
             $table->timestamp('tanggal_kirim')->nullable();

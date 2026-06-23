@@ -5,7 +5,7 @@
 <style>
     .page-header {
         position: relative;
-        padding: 6rem 0;
+        padding: 5rem 0;
         background: #ffffff;
         text-align: center;
         overflow: hidden;
@@ -26,10 +26,21 @@
 
     .page-header h1 {
         font-family: 'Playfair Display', serif;
-        font-size: 3.5rem;
-        color: var(--text-dark);
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, var(--text-dark) 0%, var(--text-dark) 30%, var(--primary) 50%, var(--accent) 70%, var(--accent) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+        margin-bottom: 1rem;
         position: relative;
         z-index: 1;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        color: var(--text-light);
+        max-width: 600px;
+        margin: 0 auto;
     }
 
     .about-content {
@@ -116,6 +127,69 @@
         .about-grid { grid-template-columns: 1fr; gap: 3rem; }
         .values-grid { grid-template-columns: 1fr; }
     }
+    
+    @media (max-width: 768px) {
+            .page-header {
+                padding: 2rem 0 1.5rem;
+            }
+            
+            .page-header h1 {
+                font-size: 1.3rem !important;
+                margin-bottom: 0.5rem;
+            }
+            
+            .page-header p {
+                font-size: 0.75rem !important;
+                padding: 0 1rem;
+            }
+            
+            .about-content {
+                padding: 2rem 1.25rem;
+            }
+            
+            .about-grid {
+                gap: 2rem;
+                margin-bottom: 3rem;
+            }
+            
+            .about-text h2 {
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+            }
+            
+            .about-text p {
+                font-size: 0.9rem;
+                line-height: 1.7;
+                margin-bottom: 1rem;
+            }
+            
+            .section-title-v2 h2 {
+                font-size: 1.5rem;
+            }
+            
+            .values-grid {
+                gap: 1.5rem;
+                margin-top: 2rem;
+            }
+            
+            .value-card {
+                padding: 2rem 1.5rem;
+            }
+            
+            .value-card i {
+                font-size: 2.2rem;
+                margin-bottom: 1rem;
+            }
+            
+            .value-card h3 {
+                font-size: 1.1rem;
+                margin-bottom: 0.75rem;
+            }
+            
+            .value-card p {
+                font-size: 0.85rem;
+            }
+        }
 </style>
 @endsection
 

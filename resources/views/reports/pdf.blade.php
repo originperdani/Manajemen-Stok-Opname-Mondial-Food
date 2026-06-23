@@ -3,181 +3,337 @@
 <head>
     <title>{{ $report['title'] }}</title>
     <style>
-        /* Reset default margins for print */
         @page {
+            margin: 22px 24px 34px;
+        }
+
+        body {
+            font-family: DejaVu Sans, Arial, sans-serif;
+            color: #1f2937;
+            font-size: 10px;
+            line-height: 1.35;
+        }
+
+        .header {
+            border-bottom: 3px solid #d97706;
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+        }
+
+        .brand {
+            color: #d97706;
+            font-size: 22px;
+            font-weight: bold;
             margin: 0;
-            size: auto;
+            letter-spacing: 0.5px;
         }
-        
-        body { 
-            font-family: 'Helvetica', 'Arial', sans-serif; 
-            font-size: 10pt; 
-            color: #333; 
-            line-height: 1.4; 
-            padding: 0; 
-            margin: 0; 
+
+        .title {
+            font-size: 14px;
+            font-weight: bold;
+            margin: 5px 0 0;
         }
-        
-        /* Kop Surat Styles - Full Width */
-        .kop-surat {
+
+        .meta {
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .summary {
             width: 100%;
-            margin: 0;
-            padding: 0;
-            line-height: 0; /* Remove extra space below image */
+            border-collapse: separate;
+            border-spacing: 8px 0;
+            margin: 0 -8px 14px;
         }
-        .kop-surat img {
-            width: 100%;
-            height: auto;
+
+        .summary td {
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .summary-label {
             display: block;
-            margin: 0;
-            padding: 0;
+            color: #64748b;
+            font-size: 8px;
+            font-weight: bold;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
         }
 
-        /* Content Wrapper - To give margins to the report data only */
-        .content-wrapper {
-            padding: 0 40px 40px 40px;
+        .summary-value {
+            color: #111827;
+            font-size: 13px;
+            font-weight: bold;
         }
 
-        .report-title { text-align: center; margin-bottom: 20px; margin-top: 20px; }
-        .report-title h2 { margin: 0; font-size: 14pt; text-transform: uppercase; }
-        .report-title p { margin: 5px 0; font-size: 10pt; }
+        .section-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #d97706;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
 
-        .info { margin-bottom: 20px; width: 100%; }
-        .info td { padding: 2px 0; }
+        .sub-section-title {
+            font-size: 10px;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 8px;
+        }
 
-        .summary-box { background: #f9f9f9; border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; }
-        .summary-box h3 { margin-top: 0; font-size: 11pt; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
-        .summary-item { margin-bottom: 5px; }
-        .summary-label { font-weight: bold; width: 180px; display: inline-block; }
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
 
-        .section { margin-bottom: 30px; }
-        .section-title { font-weight: bold; font-size: 11pt; margin-bottom: 10px; text-transform: uppercase; color: #2c3e50; }
-        
-        table.data-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; table-layout: fixed; }
-        table.data-table th { background: #f2f2f2; border: 1px solid #ccc; padding: 8px 5px; text-align: left; font-size: 9pt; }
-        table.data-table td { border: 1px solid #eee; padding: 6px 5px; font-size: 8.5pt; word-wrap: break-word; vertical-align: top; }
-        
-        .footer { margin-top: 50px; width: 100%; }
-        .signature { float: right; width: 200px; text-align: center; }
-        .signature-space { height: 80px; display: flex; align-items: center; justify-content: center; }
-        .signature-name { font-weight: bold; text-decoration: underline; }
+        .report-table th {
+            background: #d97706;
+            color: #ffffff;
+            font-size: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 8px 6px;
+            border: 1px solid #92400e;
+        }
 
-        .page-break { page-break-after: always; }
+        .report-table td {
+            padding: 7px 6px;
+            border: 1px solid #e5e7eb;
+            vertical-align: top;
+            word-wrap: break-word;
+        }
 
-        @media print {
-            .no-print { display: none; }
-            body { padding: 0; margin: 0; }
-            .header { border-bottom: 2px solid #000; }
+        .report-table tr:nth-child(even) td {
+            background: #f9fafb;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .muted {
+            color: #64748b;
+            font-size: 8px;
+        }
+
+        .footer {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: -20px;
+            color: #94a3b8;
+            font-size: 8px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 8px;
         }
     </style>
 </head>
-<body onload="{{ isset($isPrint) ? 'window.print()' : '' }}">
-    @if(isset($isPrint))
-    <div class="no-print" style="background: #f8d7da; color: #721c24; padding: 10px; text-align: center; margin-bottom: 20px;">
-        Halaman ini siap cetak. Gunakan fitur <strong>Save as PDF</strong> pada menu print browser Anda. 
-        <button onclick="window.print()" style="margin-left: 10px;">Cetak Sekarang</button>
-        
-        @php
-            if (isset($viewer) && $viewer === 'owner') {
-                $backUrl = route('owner.reports.' . $module);
-            } else {
-                $backUrl = route($module . '.laporan');
-            }
-        @endphp
-        <a href="{{ $backUrl }}" style="margin-left: 5px; text-decoration: none; background: #efefef; color: black; padding: 2px 10px; border: 1px solid #767676; border-radius: 2px; font-size: 13px; display: inline-block; vertical-align: middle;">Kembali</a>
-    </div>
-    @endif
- 
-    <div class="kop-surat">
-        <img src="{{ asset('images/kop-surat.png') }}" alt="Kop Surat">
-    </div>
-
-    <div class="content-wrapper">
-        <div class="report-title">
-            <h2>{{ $report['title'] }}</h2>
-            <p>{{ $report['subtitle'] }}</p>
-        </div>
-
-        <table class="info">
+<body>
+    <div class="header">
+        <table style="width: 100%; border-collapse: collapse;">
             <tr>
-                <td width="100">Periode</td>
-                <td>: {{ $report['period_label'] }}</td>
-                <td width="100" align="right">Dicetak pada</td>
-                <td width="120">: {{ date('d/m/Y H:i') }}</td>
-            </tr>
-            <tr>
-                <td>Dicetak oleh</td>
-                <td>: {{ $generatedBy }}</td>
-                <td></td>
-                <td></td>
+                <td>
+                    <h1 class="brand">Mondial Bakery</h1>
+                    <p class="title">{{ $report['title'] }}</p>
+                    <p class="meta">{{ $report['period_label'] }}</p>
+                </td>
+                <td style="text-align: right;">
+                    <p class="meta">Tanggal cetak</p>
+                    <p style="font-weight: bold; margin: 0;">{{ $report['generated_at']->format('d/m/Y H:i') }} WIB</p>
+                </td>
             </tr>
         </table>
+    </div>
 
-        <div class="summary-box">
-            <h3>RINGKASAN</h3>
-            @foreach($report['summary'] as $summary)
-                <div class="summary-item">
-                    <span class="summary-label">{{ $summary['label'] }}</span>
-                    <span>: {{ $summary['value'] }}</span>
-                </div>
-            @endforeach
-        </div>
+    @if($report['module'] === 'gudang')
+        <table class="summary">
+            <tr>
+                <td>
+                    <span class="summary-label">Total Jenis Bahan Baku</span>
+                    <span class="summary-value">{{ number_format($report['total_bahan_baku'], 0, ',', '.') }}</span>
+                </td>
+                <td>
+                    <span class="summary-label">Total Aktivitas Stok</span>
+                    <span class="summary-value">{{ number_format($report['total_logs'], 0, ',', '.') }}</span>
+                </td>
+                <td>
+                    <span class="summary-label">Total Bahan Masuk</span>
+                    <span class="summary-value">{{ number_format($report['total_masuk'], 0, ',', '.') }}</span>
+                </td>
+                <td>
+                    <span class="summary-label">Bahan Stok Menipis</span>
+                    <span class="summary-value">{{ number_format($report['stok_menipis'], 0, ',', '.') }}</span>
+                </td>
+                <td>
+                    <span class="summary-label">Nilai Persediaan Akhir</span>
+                    <span class="summary-value">Rp {{ number_format($report['total_nilai_persediaan'], 0, ',', '.') }}</span>
+                </td>
+            </tr>
+        </table>
+    @elseif($report['module'] === 'produksi')
+        <table class="summary">
+            <tr>
+                <td>
+                    <span class="summary-label">Total Aktivitas Produksi</span>
+                    <span class="summary-value">{{ number_format($report['total_produksi'], 0, ',', '.') }}</span>
+                </td>
+                <td>
+                    <span class="summary-label">Total Bahan Jadi</span>
+                    <span class="summary-value">{{ number_format($report['total_jadi'], 0, ',', '.') }}</span>
+                </td>
+                <td>
+                    <span class="summary-label">Produk Diproduksi</span>
+                    <span class="summary-value">{{ number_format($report['produk_diproduksi'], 0, ',', '.') }}</span>
+                </td>
+                <td>
+                    <span class="summary-label">Produksi Selesai</span>
+                    <span class="summary-value">{{ number_format($report['produksi_selesai'], 0, ',', '.') }}</span>
+                </td>
+            </tr>
+        </table>
+    @elseif($report['module'] === 'penjualan')
+        <table class="summary">
+            <tr>
+                <td>
+                    <span class="summary-label">Total Transaksi</span>
+                    <span class="summary-value">{{ number_format($report['total_transaksi'], 0, ',', '.') }}</span>
+                </td>
+                <td>
+                    <span class="summary-label">Transaksi Selesai</span>
+                    <span class="summary-value">{{ number_format($report['transaksi_selesai'], 0, ',', '.') }}</span>
+                </td>
+                <td>
+                    <span class="summary-label">Total Pendapatan</span>
+                    <span class="summary-value">Rp {{ number_format($report['total_pendapatan'], 0, ',', '.') }}</span>
+                </td>
+                <td>
+                    <span class="summary-label">Rata-rata Transaksi</span>
+                    <span class="summary-value">Rp {{ number_format($report['avg_transaksi'], 0, ',', '.') }}</span>
+                </td>
+            </tr>
+        </table>
+    @endif
 
-        @foreach($report['sections'] as $index => $section)
-            <div class="section">
-                <div class="section-title">{{ $section['title'] }}</div>
-                <table class="data-table">
-                    <thead>
+    @foreach($report['sections'] as $section)
+        <div class="section-title">{{ $section['title'] }}</div>
+        
+        @if($report['module'] === 'gudang' && isset($section['headers_masuk']))
+            <div class="sub-section-title">STOK MASUK</div>
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        @foreach($section['headers_masuk'] as $header)
+                            <th>{{ $header }}</th>
+                        @endforeach
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($section['rows_masuk'] as $row)
                         <tr>
-                            @foreach($section['headers'] as $hIndex => $header)
-                                <th width="{{ $section['widths'][$hIndex] ?? '' }}%">{{ $header }}</th>
+                            @foreach($row as $cell)
+                                <td>{{ $cell }}</td>
                             @endforeach
                         </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($section['rows'] as $row)
-                            <tr>
-                                @foreach($row as $cell)
-                                    <td>{{ $cell }}</td>
-                                @endforeach
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="{{ count($section['headers']) }}" align="center">Tidak ada data</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-            @if(!$loop->last && count($section['rows']) > 15)
-                <div class="page-break"></div>
-            @endif
-        @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="{{ count($section['headers_masuk']) }}" class="text-center">Tidak ada data</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
 
-        <div class="footer">
-            <div class="signature">
-                <p>Jakarta, {{ date('d/m/Y') }}</p>
-                <p>Mengetahui,</p>
-                <p><strong>Owner Mondial Bakery</strong></p>
-                <div class="signature-space">
-                    @php
-                        $ttdPath = $owner && $owner->ttd ? 'storage/' . $owner->ttd : null;
-                        $fotoPath = $owner && $owner->foto ? 'storage/' . $owner->foto : null;
-                    @endphp
-                    
-                    @if($ttdPath && file_exists(public_path($ttdPath)))
-                        <img src="{{ asset($ttdPath) }}" height="60">
-                    @elseif($fotoPath && file_exists(public_path($fotoPath)))
-                        <img src="{{ asset($fotoPath) }}" height="60">
-                    @else
-                        <br><br><br>
-                        <p style="color: #ccc; font-style: italic;">(Tanda Tangan)</p>
-                    @endif
-                </div>
-                <p class="signature-name">{{ $ownerName }}</p>
-            </div>
-            <div style="clear: both;"></div>
+            <div class="sub-section-title">STOK KELUAR</div>
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        @foreach($section['headers_keluar'] as $header)
+                            <th>{{ $header }}</th>
+                        @endforeach
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($section['rows_keluar'] as $row)
+                        <tr>
+                            @foreach($row as $cell)
+                                <td>{{ $cell }}</td>
+                            @endforeach
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="{{ count($section['headers_keluar']) }}" class="text-center">Tidak ada data</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        @else
+            <table class="report-table">
+                            <thead>
+                                <tr>
+                                    @foreach($section['headers'] as $hIndex => $header)
+                                        <th width="{{ $section['widths'][$hIndex] ?? '' }}%">{{ $header }}</th>
+                                    @endforeach
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($section['rows'] as $row)
+                                    <tr>
+                                        @foreach($row as $index => $cell)
+                                        <td>
+                                            @if(isset($section['headers'][$index]) && in_array(strtolower($section['headers'][$index]), ['nilai stok', 'total']))
+                                                {{ $cell }}
+                                            @else
+                                                {{ $cell }}
+                                            @endif
+                                        </td>
+                                    @endforeach
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="{{ count($section['headers']) }}" class="text-center">Tidak ada data</td>
+                                    </tr>
+                                @endforelse
+                                @if($report['module'] === 'penjualan' && strtoupper($section['title']) === 'PRODUK TERJUAL')
+                                    @php
+                                        $totalProdukTerjual = 0;
+                                        foreach($section['rows'] as $row) {
+                                            // Remove any non-numeric characters (like dots used as thousand separators)
+                                            $cleanNumber = preg_replace('/[^0-9]/', '', $row[1]);
+                                            $totalProdukTerjual += (int) $cleanNumber;
+                                        }
+                                    @endphp
+                                    <tr style="background: #fef3c7; font-weight: bold;">
+                                        <td style="border-top: 2px solid #d97706;">Keseluruhan Produk Terjual</td>
+                                        <td style="border-top: 2px solid #d97706;">{{ number_format($totalProdukTerjual, 0, ',', '.') }}</td>
+                                    </tr>
+                                @endif
+                            </tbody>
+                        </table>
+        @endif
+    @endforeach
+
+    <div style="margin-top: 40px; page-break-inside: avoid;">
+        <div style="float: right; width: 200px; text-align: center;">
+            <p>Depok, {{ $report['generated_at']->format('d/m/Y') }}</p>
+            <p>Mengetahui,</p>
+            <p><strong>Owner Mondial Bakery</strong></p>
+            <div style="height: 60px;"></div>
+            <p style="font-weight: bold; text-decoration: underline;">{{ $ownerName }}</p>
         </div>
+        <div style="clear: both;"></div>
+    </div>
+
+    <div class="footer">
+        Laporan ini dibuat otomatis oleh Sistem Informasi Mondial Bakery
     </div>
 </body>
 </html>

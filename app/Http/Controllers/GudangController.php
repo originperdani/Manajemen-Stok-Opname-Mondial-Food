@@ -16,6 +16,31 @@ class GudangController extends Controller
         return view('gudang.dashboard', compact('totalBahan', 'bahanMenipis', 'recentLogs'));
     }
 
+    public function riwayat(Request $request)
+    {
+        $sort = $request->get('sort', 'terbaru');
+        $tanggal = $request->get('tanggal');
+        
+        $query = StokLog::where('tipe', 'bahan_baku')->with(['user', 'bahanBaku']);
+        
+        // Filter by single date
+        if ($tanggal) {
+            $query->whereDate('created_at', '=', $tanggal);
+        }
+        
+        if ($sort === 'terlama') {
+            $query->oldest();
+        } else {
+            $query->latest();
+        }
+        
+        $logs = $query->get();
+        $logsMasuk = $logs->where('jenis', 'masuk');
+        $logsKeluar = $logs->where('jenis', 'keluar');
+        
+        return view('gudang.riwayat', compact('logs', 'logsMasuk', 'logsKeluar', 'sort', 'tanggal'));
+    }
+
     public function index(Request $request)
     {
         $query = BahanBaku::query();
@@ -25,7 +50,7 @@ class GudangController extends Controller
         if ($request->filter === 'menipis') {
             $query->whereColumn('stok', '<=', 'stok_minimum');
         }
-        $bahan = $query->latest()->paginate(15);
+        $bahan = $query->latest()->get();
         return view('gudang.index', compact('bahan'));
     }
 
@@ -53,7 +78,7 @@ class GudangController extends Controller
             'jumlah' => $bahan->stok,
             'stok_sebelum' => 0,
             'stok_sesudah' => $bahan->stok,
-            'keterangan' => 'Stok awal',
+            'keterangan' => 'Tambah Bahan Baku Baru Stok Awal ' . $bahan->nama_bahan,
             'user_id' => auth()->id(),
         ]);
 
@@ -88,7 +113,6 @@ class GudangController extends Controller
     {
         $request->validate([
             'jumlah' => 'required|numeric|min:0.01',
-            'keterangan' => 'nullable|string',
         ]);
 
         $stokSebelum = $bahan->stok;
@@ -101,7 +125,7 @@ class GudangController extends Controller
             'jumlah' => $request->jumlah,
             'stok_sebelum' => $stokSebelum,
             'stok_sesudah' => $bahan->stok,
-            'keterangan' => $request->keterangan ?? 'Penambahan stok',
+            'keterangan' => 'Update Penambahan Stok ' . $bahan->nama_bahan,
             'user_id' => auth()->id(),
         ]);
 

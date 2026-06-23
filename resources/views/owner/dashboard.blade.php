@@ -14,49 +14,57 @@
 
 @section('content')
 <div class="stat-grid">
-    <div class="stat-card">
-        <div class="stat-icon orange"><i class="fas fa-dollar-sign"></i></div>
-        <div class="stat-info">
+    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+        <div class="stat-info" style="flex: 1;">
             <h4>Pendapatan Hari Ini</h4>
             <p>Rp {{ number_format($pendapatanHariIni, 0, ',', '.') }}</p>
         </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-icon blue"><i class="fas fa-shopping-cart"></i></div>
-        <div class="stat-info">
+    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+        <div class="stat-info" style="flex: 1;">
             <h4>Transaksi Hari Ini</h4>
             <p>{{ $transaksiHariIni }}</p>
         </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-icon green"><i class="fas fa-birthday-cake"></i></div>
-        <div class="stat-info">
+    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+        <div class="stat-info" style="flex: 1;">
             <h4>Total Produk</h4>
             <p>{{ $totalProduk }}</p>
         </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-icon purple"><i class="fas fa-users"></i></div>
-        <div class="stat-info">
+    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+        <div class="stat-info" style="flex: 1;">
             <h4>Total User</h4>
             <p>{{ $totalUser }}</p>
+        </div>
+    </div>
+    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+        <div class="stat-info" style="flex: 1;">
+            <h4>Produk Stok Menipis</h4>
+            <p>{{ $produkStokMenipis }}</p>
+        </div>
+    </div>
+    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+        <div class="stat-info" style="flex: 1;">
+            <h4>Bahan Stok Menipis</h4>
+            <p>{{ $bahanStokMenipis }}</p>
         </div>
     </div>
 </div>
 
 <div class="grid-2">
-    <div class="card">
+    <div class="card" style="border-left: 5px solid var(--primary);">
         <div class="card-header">
-            <h3><i class="fas fa-chart-line" style="color: var(--accent); margin-right: 0.5rem;"></i> Penjualan 7 Hari Terakhir</h3>
+            <h3>Penjualan 7 Hari Terakhir</h3>
         </div>
         <div class="card-body">
             <canvas id="salesChart" height="250"></canvas>
         </div>
     </div>
-    <div class="card">
+    <div class="card" style="border-left: 5px solid var(--primary);">
         <div class="card-header">
-            <h3><i class="fas fa-clock" style="color: var(--accent); margin-right: 0.5rem;"></i> Transaksi Terbaru</h3>
-            <a href="{{ route('owner.transaksi') }}" class="btn btn-secondary btn-sm">Lihat Semua</a>
+            <h3>Transaksi Terbaru</h3>
+            <a href="{{ route('owner.transaksi') }}" class="btn btn-primary btn-sm" style="background: var(--gradient-gold); border: none; color: #fff;">Lihat Semua</a>
         </div>
         <div class="card-body" style="padding:0;max-height:400px;overflow-y:auto">
             <table>
@@ -69,6 +77,13 @@
                 </thead>
                 <tbody>
                     @foreach($transaksiTerbaru as $t)
+                    @php
+                        $isPickup = $t->pengiriman && in_array($t->pengiriman->metode_kirim, ['ambil_sendiri']);
+                        $displayStatus = $t->status;
+                        if ($isPickup && $t->status === 'dikirim') {
+                            $displayStatus = 'siap diambil';
+                        }
+                    @endphp
                     <tr>
                         <td>
                             <div style="font-weight: 600;">{{ $t->kode_transaksi }}</div>
@@ -84,7 +99,7 @@
                                 'dikirim'=>'info',
                                 default=>'secondary' 
                             } }}">
-                                {{ ucfirst($t->status) }}
+                                {{ ucfirst($displayStatus) }}
                             </span>
                         </td>
                     </tr>
@@ -95,33 +110,66 @@
     </div>
 </div>
 
+<!-- Filter Section - diatas total pendapatan -->
+<div class="card mb-4" style="margin-top: 2.5rem; border-left: 5px solid var(--primary);">
+    <div class="card-header">
+        <h3>Filter Periode</h3>
+    </div>
+    <div class="card-body" style="padding: 1.5rem;">
+        <form method="GET" action="{{ route('owner.dashboard') }}" class="d-flex align-items-end" style="gap: 2rem; flex-wrap: wrap;">
+            <div class="form-group mb-0" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 0.9rem; margin-bottom: 0.5rem; display: block;">Tipe Filter</label>
+                <select name="filter_type" class="form-control" onchange="updateFilterOptions(this.value)" style="min-width: 150px; padding: 0.5rem 0.75rem;">
+                    <option value="harian" {{ $filterType === 'harian' ? 'selected' : '' }}>Harian</option>
+                    <option value="bulanan" {{ $filterType === 'bulanan' ? 'selected' : '' }}>Bulanan</option>
+                    <option value="tahunan" {{ $filterType === 'tahunan' ? 'selected' : '' }}>Tahunan</option>
+                </select>
+            </div>
+            
+            <div class="form-group mb-0" id="tanggal-filter" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 0.9rem; margin-bottom: 0.5rem; display: block;">Tanggal</label>
+                <input type="date" name="tanggal" class="form-control" value="{{ $tanggal }}" style="min-width: 180px; padding: 0.5rem 0.75rem;">
+            </div>
+            
+            <div class="form-group mb-0" id="bulan-filter" style="display: none; margin-bottom: 0;">
+                <label class="form-label" style="font-size: 0.9rem; margin-bottom: 0.5rem; display: block;">Bulan</label>
+                <select name="bulan" class="form-control" style="min-width: 150px; padding: 0.5rem 0.75rem;">
+                    @for($m = 1; $m <= 12; $m++)
+                        <option value="{{ $m }}" {{ $bulan == $m ? 'selected' : '' }}>{{ now()->parse('2025-'.$m.'-01')->translatedFormat('F') }}</option>
+                    @endfor
+                </select>
+            </div>
+            
+            <div class="form-group mb-0" id="tahun-filter" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 0.9rem; margin-bottom: 0.5rem; display: block;">Tahun</label>
+                <select name="tahun" class="form-control" style="min-width: 120px; padding: 0.5rem 0.75rem;">
+                    @for($y = date('Y') - 5; $y <= date('Y') + 1; $y++)
+                        <option value="{{ $y }}" {{ $tahun == $y ? 'selected' : '' }}>{{ $y }}</option>
+                    @endfor
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-sm" style="background: var(--gradient-gold); border: none; padding: 0.375rem 0.75rem; font-size: 0.875rem; white-space: nowrap;">
+                Terapkan
+            </button>
+            <a href="{{ route('owner.dashboard') }}" class="btn btn-secondary btn-sm" style="padding: 0.375rem 0.75rem; font-size: 0.875rem; white-space: nowrap;">
+                Reset
+            </a>
+        </form>
+    </div>
+</div>
+
 <div class="stat-grid" style="margin-top: 2.5rem;">
-    <div class="stat-card" style="border-left: 5px solid var(--success);">
-        <div class="stat-icon green"><i class="fas fa-coins"></i></div>
-        <div class="stat-info">
-            <h4>Total Pendapatan</h4>
+    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+        <div class="stat-info" style="flex: 1;">
+            <h4>Total Pendapatan <span style="font-size: 0.8rem; color: var(--text-light); display: block;">({{ $periodeLabel }})</span></h4>
             <p>Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</p>
         </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-icon blue"><i class="fas fa-receipt"></i></div>
-        <div class="stat-info">
-            <h4>Total Transaksi</h4>
+    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+        <div class="stat-info" style="flex: 1;">
+            <h4>Total Transaksi <span style="font-size: 0.8rem; color: var(--text-light); display: block;">({{ $periodeLabel }})</span></h4>
             <p>{{ $totalTransaksi }}</p>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon {{ $produkStokMenipis > 0 ? 'red' : 'green' }}"><i class="fas fa-exclamation-triangle"></i></div>
-        <div class="stat-info">
-            <h4>Produk Stok Menipis</h4>
-            <p>{{ $produkStokMenipis }}</p>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon {{ $bahanStokMenipis > 0 ? 'red' : 'green' }}"><i class="fas fa-boxes"></i></div>
-        <div class="stat-info">
-            <h4>Bahan Stok Menipis</h4>
-            <p>{{ $bahanStokMenipis }}</p>
         </div>
     </div>
 </div>
@@ -129,6 +177,21 @@
 
 @section('scripts')
 <script>
+function updateFilterOptions(type) {
+    const tanggalFilter = document.getElementById('tanggal-filter');
+    const bulanFilter = document.getElementById('bulan-filter');
+    const tahunFilter = document.getElementById('tahun-filter');
+    
+    tanggalFilter.style.display = type === 'harian' ? 'block' : 'none';
+    bulanFilter.style.display = type === 'bulanan' ? 'block' : 'none';
+    tahunFilter.style.display = (type === 'bulanan' || type === 'tahunan') ? 'block' : 'none';
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', () => {
+    updateFilterOptions('{{ $filterType }}');
+});
+
 new Chart(document.getElementById('salesChart'), {
     type: 'line',
     data: {

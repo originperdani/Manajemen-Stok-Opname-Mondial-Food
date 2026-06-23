@@ -5,10 +5,48 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\GudangController;
 use App\Http\Controllers\PenjualanController;
-use App\Http\Controllers\ProduksiController;
+use App\Http\Controllers\MidtransWebhookController;
 use App\Http\Controllers\CustomerController;
-
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ProduksiController;
+
+// Route Tes Midtrans
+Route::get('/test-midtrans', function () {
+    try {
+        \Midtrans\Config::$serverKey = config('midtrans.server_key');
+        \Midtrans\Config::$isProduction = config('midtrans.env') === 'production';
+        \Midtrans\Config::$isSanitized = true;
+        \Midtrans\Config::$is3ds = true;
+
+        $params = [
+            'transaction_details' => [
+                'order_id' => 'TEST-' . time(),
+                'gross_amount' => 10000,
+            ],
+            'customer_details' => [
+                'first_name' => 'Test',
+                'email' => 'test@example.com',
+                'phone' => '081234567890',
+            ],
+            'item_details' => [
+                [
+                    'id' => '1',
+                    'price' => 10000,
+                    'quantity' => 1,
+                    'name' => 'Produk Test',
+                ]
+            ]
+        ];
+
+        $snapToken = \Midtrans\Snap::getSnapToken($params);
+
+        return view('customer.test-midtrans', compact('snapToken'));
+    } catch (\Exception $e) {
+        dd('Midtrans Error: ' . $e->getMessage(), $e->getTraceAsString());
+    }
+})->name('test.midtrans');
 
 // Auth Routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -16,6 +54,69 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Password Reset Routes
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Http\Request;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Str;
+
+Route::get('/forgot-password', function () {
+    return view('auth.forgot-password');
+})->middleware('guest')->name('password.request');
+
+Route::post('/forgot-password', function (Request $request) {
+    $data = $request->validate(['email' => 'required|email']);
+    $data['email'] = strtolower(trim($data['email']));
+
+    $status = Password::sendResetLink($data);
+    return $status === Password::RESET_LINK_SENT
+        ? back()->with(['status' => 'Link reset sandi sudah dikirim ke email Anda. Silakan cek kotak masuk atau folder spam.'])
+        : back()->withErrors(['email' => __($status)]);
+})->middleware('guest')->name('password.email');
+
+Route::get('/reset-password/{token}', function (Request $request, string $token) {
+    return view('auth.reset-password', [
+        'token' => $token,
+        'email' => $request->query('email', ''),
+    ]);
+})->middleware('guest')->name('password.reset');
+
+Route::post('/reset-password', function (Request $request) {
+    $data = $request->validate([
+        'token' => 'required',
+        'email' => 'required|email',
+        'password' => 'required|min:6|confirmed',
+    ]);
+    $data['email'] = strtolower(trim($data['email']));
+
+    $status = Password::reset(
+        $data,
+        function ($user, $password) {
+            $user->forceFill([
+                'password' => Hash::make($password),
+            ])->setRememberToken(Str::random(60));
+
+            $user->save();
+
+            event(new PasswordReset($user));
+        }
+    );
+    return $status === Password::PASSWORD_RESET
+        ? redirect()->route('login')->with('status', 'Sandi berhasil direset. Silakan masuk dengan sandi baru.')
+        : back()->withInput($request->only('email'))->withErrors(['email' => [__($status)]]);
+})->middleware('guest')->name('password.update');
+
+// Profile Routes (harus login)
+Route::middleware(['auth'])->prefix('profile')->name('profile.')->group(function () {
+    Route::get('/', [ProfileController::class, 'edit'])->name('edit');
+    Route::put('/', [ProfileController::class, 'update'])->name('update');
+});
+
+Route::post('/notifications/read', [NotificationController::class, 'markRead'])
+    ->middleware('auth')
+    ->name('notifications.read');
 
 // Landing Page
 Route::get('/', [CustomerController::class, 'home'])->name('home');
@@ -33,7 +134,13 @@ Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer
     Route::post('/checkout', [CustomerController::class, 'prosesCheckout'])->name('checkout.proses');
     Route::get('/pesanan', [CustomerController::class, 'pesanan'])->name('pesanan');
     Route::get('/pesanan/{transaksi}', [CustomerController::class, 'pesananDetail'])->name('pesanan.detail');
+    Route::get('/pesanan/{transaksi}/struk', [CustomerController::class, 'lihatStruk'])->name('pesanan.struk');
+    Route::get('/pesanan/{transaksi}/struk/download', [CustomerController::class, 'downloadStruk'])->name('pesanan.struk.download');
+    Route::post('/pesanan/{transaksi}/snap-token', [CustomerController::class, 'getSnapToken'])->name('pesanan.snap-token');
 });
+
+// Midtrans Webhook (no auth needed)
+Route::post('/midtrans/webhook', [App\Http\Controllers\MidtransWebhookController::class, 'handleWebhook'])->name('midtrans.webhook');
 
 // Katalog (accessible by all)
 Route::get('/katalog', [CustomerController::class, 'katalog'])->name('katalog');
@@ -73,6 +180,7 @@ Route::middleware(['auth', 'role:admin_gudang'])->prefix('gudang')->name('gudang
     Route::put('/bahan/{bahan}', [GudangController::class, 'update'])->name('update');
     Route::delete('/bahan/{bahan}', [GudangController::class, 'destroy'])->name('destroy');
     Route::post('/bahan/{bahan}/tambah-stok', [GudangController::class, 'tambahStok'])->name('tambah-stok');
+    Route::get('/riwayat', [GudangController::class, 'riwayat'])->name('riwayat');
 
     // Laporan Gudang
     Route::get('/laporan', [ReportController::class, 'gudang'])->name('laporan');
@@ -86,6 +194,8 @@ Route::middleware(['auth', 'role:admin_penjualan'])->prefix('penjualan')->name('
     Route::post('/pos/proses', [PenjualanController::class, 'prosesPos'])->name('pos.proses');
     Route::get('/transaksi', [PenjualanController::class, 'transaksi'])->name('transaksi');
     Route::get('/transaksi/{transaksi}', [PenjualanController::class, 'detailTransaksi'])->name('transaksi.detail');
+    Route::get('/transaksi/{transaksi}/struk', [PenjualanController::class, 'lihatStruk'])->name('transaksi.struk');
+    Route::get('/transaksi/{transaksi}/struk/download', [PenjualanController::class, 'downloadStruk'])->name('transaksi.struk.download');
     Route::put('/transaksi/{transaksi}/status', [PenjualanController::class, 'updateStatus'])->name('transaksi.status');
     Route::post('/transaksi/{transaksi}/kirim', [PenjualanController::class, 'kirimPesanan'])->name('transaksi.kirim');
 
@@ -112,6 +222,7 @@ Route::middleware(['auth', 'role:admin_produksi'])->prefix('produksi')->name('pr
     Route::delete('/resep/{resep}', [ProduksiController::class, 'deleteResep'])->name('resep.delete');
     Route::get('/input', [ProduksiController::class, 'inputProduksi'])->name('input');
     Route::post('/input', [ProduksiController::class, 'prosesProduksi'])->name('input.proses');
+    Route::get('/riwayat', [ProduksiController::class, 'riwayatProduksi'])->name('riwayat');
 
     // Laporan Produksi
     Route::get('/laporan', [ReportController::class, 'produksi'])->name('laporan');

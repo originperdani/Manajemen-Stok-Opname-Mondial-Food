@@ -13,7 +13,7 @@
 @endsection
 
 @section('content')
-<div class="action-header">
+<div class="action-header" style="border-left: 5px solid var(--primary);">
     <form method="GET" style="display:flex;gap:0.75rem;flex:1;flex-wrap:wrap">
         <input type="text" name="search" class="form-control" placeholder="Cari user..." value="{{ request('search') }}" style="width:250px">
         <select name="role" class="form-control" style="width:180px" onchange="this.form.submit()">
@@ -22,12 +22,12 @@
                 <option value="{{ $r }}" {{ request('role')==$r?'selected':'' }}>{{ ucwords(str_replace('_',' ',$r)) }}</option>
             @endforeach
         </select>
-        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Cari</button>
+        <button type="submit" class="btn btn-primary">Cari</button>
     </form>
-    <a href="{{ route('owner.users.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Tambah User</a>
+    <a href="{{ route('owner.users.create') }}" class="btn btn-primary">Tambah User</a>
 </div>
 
-<div class="card">
+<div class="card" style="border-left: 5px solid var(--primary);">
     <div class="table-responsive">
         <table>
             <thead><tr><th>Nama</th><th>Email</th><th>Role</th><th>Telepon</th><th>Status</th><th>Aksi</th></tr></thead>
@@ -41,10 +41,10 @@
                     <td><span class="badge {{ $u->is_active ? 'badge-success' : 'badge-danger' }}">{{ $u->is_active ? 'Aktif' : 'Nonaktif' }}</span></td>
                     <td>
                         <div class="d-flex gap-1">
-                            <a href="{{ route('owner.users.edit', $u) }}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>
+                            <a href="{{ route('owner.users.edit', $u) }}" class="btn btn-warning btn-sm">Edit</a>
                             @if($u->id !== auth()->id())
                             <form method="POST" action="{{ route('owner.users.delete', $u) }}" onsubmit="return confirm('Hapus user ini?')">@csrf @method('DELETE')
-                                <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                <button class="btn btn-danger btn-sm">Hapus</button>
                             </form>
                             @endif
                         </div>

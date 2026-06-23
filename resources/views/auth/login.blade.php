@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Mondial Bakery</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/Logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/Logo.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -364,6 +366,18 @@
             border: 1px solid #FEE2E2;
             animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
         }
+        .success-msg {
+            background: #F0FDF4;
+            color: #166534;
+            padding: 1rem 1.25rem;
+            border-radius: 14px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border: 1px solid #BBF7D0;
+        }
         @keyframes shake {
             10%, 90% { transform: translate3d(-1px, 0, 0); }
             20%, 80% { transform: translate3d(2px, 0, 0); }
@@ -395,7 +409,7 @@
                 <div class="login-left-logo">
                     <img src="{{ asset('images/Logo.png') }}" alt="Mondial Bakery">
                 </div>
-                <h1>Crafting Sweet Moments.</h1>
+                <h1>Selamat Datang di Mondial Bakery.</h1>
                 <p>Selamat datang kembali di Mondial Bakery. Kelola pesanan dan nikmati pengalaman belanja roti premium terbaik.</p>
                 <div class="features">
                     <div class="feature-item">
@@ -420,6 +434,13 @@
                 </div>
                 <h2>Selamat Datang</h2>
                 <p class="subtitle">Masuk ke akun Mondial Bakery Anda</p>
+
+                @if(session('status'))
+                    <div class="success-msg">
+                        <i class="fas fa-circle-check"></i>
+                        <span>{{ session('status') }}</span>
+                    </div>
+                @endif
 
                 @if($errors->any())
                     <div class="error-msg">
@@ -446,7 +467,7 @@
                     </div>
                     <div class="form-options">
                         <label><input type="checkbox" name="remember" style="accent-color: var(--primary)"> Ingat saya</label>
-                        <a href="#">Lupa sandi?</a>
+                        <a href="{{ route('password.request') }}">Lupa sandi?</a>
                     </div>
                     <button type="submit" class="btn-login">
                         <span>Masuk ke Akun</span>
@@ -504,6 +525,23 @@
             if (event.key === 'F7') {
                 event.preventDefault();
             }
+        });
+    </script>
+    <script>
+        // Validasi Bahasa Indonesia
+        document.querySelectorAll('input[required], select[required], textarea[required]').forEach(function(el) {
+            el.addEventListener('invalid', function() {
+                if (this.validity.valueMissing) {
+                    this.setCustomValidity('Harap isi kolom ini.');
+                } else if (this.validity.typeMismatch && this.type === 'email') {
+                    this.setCustomValidity('Harap masukkan alamat email yang valid.');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+            el.addEventListener('input', function() {
+                this.setCustomValidity('');
+            });
         });
     </script>
 </body>

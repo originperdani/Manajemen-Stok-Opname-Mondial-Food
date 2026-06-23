@@ -8,6 +8,8 @@ use App\Models\DetailTransaksi;
 use App\Models\Pembayaran;
 use App\Models\Pengiriman;
 use App\Models\StokLog;
+use App\Helpers\CacheHelper;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -35,7 +37,7 @@ class PenjualanController extends Controller
             'items' => 'required|array|min:1',
             'items.*.produk_id' => 'required|exists:produk,id',
             'items.*.jumlah' => 'required|integer|min:1',
-            'metode_bayar' => 'required|in:qris,e_wallet,m_banking,bayar_ditempat',
+            'metode_bayar' => 'required|in:qris,e_wallet,m_banking,mandiri,bca,bri,bni,cash',
             'jumlah_bayar' => 'required|numeric|min:0',
         ]);
 
@@ -103,6 +105,7 @@ class PenjualanController extends Controller
                 'tanggal_bayar' => now(),
             ]);
 
+            CacheHelper::bumpVersion('produk');
             DB::commit();
             return response()->json(['success' => true, 'message' => 'Transaksi berhasil!', 'kode' => $transaksi->kode_transaksi, 'kembalian' => $kembalian]);
         } catch (\Exception $e) {
@@ -113,10 +116,10 @@ class PenjualanController extends Controller
 
     public function transaksi(Request $request)
     {
-        $query = Transaksi::with('user', 'pembayaran', 'detail.produk');
+        $query = Transaksi::with('user', 'pembayaran', 'pengiriman', 'detail.produk');
         if ($request->status) { $query->where('status', $request->status); }
         if ($request->search) { $query->where('kode_transaksi', 'like', "%{$request->search}%"); }
-        $transaksi = $query->latest()->paginate(15);
+        $transaksi = $query->latest()->get();
         return view('penjualan.transaksi', compact('transaksi'));
     }
 
@@ -126,20 +129,90 @@ class PenjualanController extends Controller
         return view('penjualan.detail-transaksi', compact('transaksi'));
     }
 
+    public function lihatStruk(Transaksi $transaksi)
+    {
+        return $this->renderStrukTransaksi($transaksi, false);
+    }
+
+    public function downloadStruk(Transaksi $transaksi)
+    {
+        return $this->renderStrukTransaksi($transaksi, true);
+    }
+
+    private function renderStrukTransaksi(Transaksi $transaksi, bool $download)
+    {
+        $transaksi->loadMissing('detail.produk', 'pembayaran', 'pengiriman', 'user');
+
+        abort_unless($transaksi->pembayaran, 404, 'Data pembayaran transaksi tidak ditemukan.');
+
+        $store = [
+            'name' => 'Mondial Bakery',
+            'address' => 'Jl. Mesjid Al-Akhyar No.34, Gandul, Kec. Cinere, Kota Depok, Jawa Barat 16512',
+            'phone' => '0857-9393-0723',
+            'email' => 'mondialfood.co@gmail.com',
+        ];
+
+        $filename = 'struk-' . $transaksi->kode_transaksi . '.pdf';
+        $pdf = Pdf::loadView('customer.struk-pesanan', [
+            'transaksi' => $transaksi,
+            'store' => $store,
+        ])->setPaper([0, 0, 226.77, 620], 'portrait');
+
+        $response = $download
+            ? $pdf->download($filename)
+            : $pdf->stream($filename);
+
+        return $response
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
+    }
+
     public function updateStatus(Request $request, Transaksi $transaksi)
     {
         $request->validate(['status' => 'required|in:pending,diproses,dikirim,selesai,dibatalkan']);
+        
+        $statusOrder = ['pending' => 0, 'diproses' => 1, 'dikirim' => 2, 'selesai' => 3];
+        $terminalStatuses = ['selesai', 'dibatalkan'];
+        $currentStatus = $transaksi->status;
+        $newStatus = $request->status;
+        $isPaymentNotSuccessful = !$transaksi->pembayaran || $transaksi->pembayaran->status !== 'berhasil';
+
+        if (in_array($currentStatus, $terminalStatuses, true)) {
+            return back()->with('error', 'Status transaksi sudah final dan tidak bisa diubah lagi.');
+        }
+
+        // If payment is not successful, only allow cancel
+        if ($isPaymentNotSuccessful && $newStatus !== 'dibatalkan') {
+            return back()->with('error', 'Pesanan belum dibayar, hanya bisa dibatalkan.');
+        }
+
+        $currentOrder = $statusOrder[$currentStatus] ?? null;
+        $newOrder = $statusOrder[$newStatus] ?? null;
+
+        if ($currentOrder !== null && $newOrder !== null && $newOrder < $currentOrder) {
+            return back()->with('error', 'Status transaksi tidak bisa dikembalikan ke tahap sebelumnya.');
+        }
+
         $transaksi->update(['status' => $request->status]);
 
-        if ($request->status === 'dikirim' && $transaksi->pengiriman) {
-            $transaksi->pengiriman->update(['status' => 'dikirim', 'tanggal_kirim' => now()]);
-        }
-        if ($request->status === 'selesai') {
-            if ($transaksi->pembayaran) {
-                $transaksi->pembayaran->update(['status' => 'berhasil', 'tanggal_bayar' => now()]);
+        if ($transaksi->pengiriman) {
+            $isPickup = in_array($transaksi->pengiriman->metode_kirim, ['ambil_sendiri']);
+            
+            if ($request->status === 'dikirim') {
+                $transaksi->pengiriman->update([
+                    'status' => $isPickup ? 'siap_diambil' : 'dikirim',
+                    'tanggal_kirim' => now()
+                ]);
             }
-            if ($transaksi->pengiriman) {
-                $transaksi->pengiriman->update(['status' => 'diterima', 'tanggal_terima' => now()]);
+            if ($request->status === 'selesai') {
+                if ($transaksi->pembayaran) {
+                    $transaksi->pembayaran->update(['status' => 'berhasil', 'tanggal_bayar' => now()]);
+                }
+                $transaksi->pengiriman->update([
+                    'status' => 'diterima',
+                    'tanggal_terima' => now()
+                ]);
             }
         }
 
@@ -159,14 +232,28 @@ class PenjualanController extends Controller
         $totalBulanIni = Transaksi::where('status', 'selesai')
             ->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun)->sum('total');
 
-        return view('penjualan.laporan', compact('laporanHarian', 'totalBulanIni', 'bulan', 'tahun'));
+        // Hitung total per metode pembayaran
+        $totalPerMetode = Pembayaran::whereHas('transaksi', function($q) use ($bulan, $tahun) {
+                $q->where('status', 'selesai')->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
+            })
+            ->selectRaw('metode, SUM(jumlah_bayar) as total')
+            ->groupBy('metode')
+            ->get()
+            ->keyBy('metode');
+
+        return view('penjualan.laporan', compact('laporanHarian', 'totalBulanIni', 'bulan', 'tahun', 'totalPerMetode'));
     }
 
     public function kirimPesanan(Request $request, Transaksi $transaksi)
     {
         $request->validate([
-            'metode_kirim' => 'required|in:ambil_sendiri,kurir_toko,grabfood,gofood',
+            'metode_kirim' => 'required|in:ambil_sendiri,kurir_toko,kurir_ojol,grabfood,gofood',
         ]);
+
+        $isPaymentNotSuccessful = !$transaksi->pembayaran || $transaksi->pembayaran->status !== 'berhasil';
+        if ($isPaymentNotSuccessful) {
+            return back()->with('error', 'Pesanan belum dibayar, tidak bisa dikirim.');
+        }
 
         Pengiriman::updateOrCreate(
             ['transaksi_id' => $transaksi->id],

@@ -11,23 +11,20 @@
 
 @section('content')
 <div class="stat-grid">
-    <div class="stat-card">
-        <div class="stat-icon orange"><i class="fas fa-dollar-sign"></i></div>
-        <div class="stat-info">
+    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+        <div class="stat-info" style="flex: 1;">
             <h4>Pendapatan Hari Ini</h4>
             <p>Rp {{ number_format($pendapatanHariIni, 0, ',', '.') }}</p>
         </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-icon blue"><i class="fas fa-shopping-cart"></i></div>
-        <div class="stat-info">
+    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+        <div class="stat-info" style="flex: 1;">
             <h4>Transaksi Hari Ini</h4>
             <p>{{ $transaksiHariIni }}</p>
         </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-icon {{ $transaksiPending > 0 ? 'red' : 'green' }}"><i class="fas fa-clock"></i></div>
-        <div class="stat-info">
+    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+        <div class="stat-info" style="flex: 1;">
             <h4>Pesanan Pending</h4>
             <p>{{ $transaksiPending }}</p>
         </div>
@@ -36,14 +33,12 @@
 
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
     <a href="{{ route('penjualan.pos') }}" class="btn btn-primary btn-lg" style="padding: 1.5rem;">
-        <i class="fas fa-cash-register" style="font-size: 1.5rem;"></i>
         <div style="text-align: left;">
             <div style="font-size: 1.1rem;">Buka Kasir POS</div>
             <div style="font-size: 0.75rem; opacity: 0.8; font-weight: 400;">Input penjualan langsung di toko</div>
         </div>
     </a>
     <a href="{{ route('penjualan.transaksi') }}" class="btn btn-secondary btn-lg" style="padding: 1.5rem;">
-        <i class="fas fa-receipt" style="font-size: 1.5rem;"></i>
         <div style="text-align: left;">
             <div style="font-size: 1.1rem;">Kelola Transaksi</div>
             <div style="font-size: 0.75rem; opacity: 0.8; font-weight: 400;">Lihat riwayat dan status pesanan</div>
@@ -51,9 +46,9 @@
     </a>
 </div>
 
-<div class="card">
+<div class="card" style="border-left: 5px solid var(--primary);">
     <div class="card-header">
-        <h3><i class="fas fa-clock" style="color: var(--accent); margin-right: 0.5rem;"></i> Transaksi Terbaru</h3>
+        <h3>Transaksi Terbaru</h3>
     </div>
     <div class="card-body" style="padding:0">
         <table>
@@ -69,6 +64,13 @@
             </thead>
             <tbody>
                 @foreach($transaksiTerbaru as $t)
+                @php
+                    $isPickup = $t->pengiriman && in_array($t->pengiriman->metode_kirim, ['ambil_sendiri']);
+                    $displayStatus = $t->status;
+                    if ($isPickup && $t->status === 'dikirim') {
+                        $displayStatus = 'siap diambil';
+                    }
+                @endphp
                 <tr>
                     <td><strong>{{ $t->kode_transaksi }}</strong></td>
                     <td>
@@ -85,13 +87,13 @@
                             'dikirim'=>'info',
                             default=>'secondary' 
                         } }}">
-                            {{ ucfirst($t->status) }}
+                            {{ ucfirst($displayStatus) }}
                         </span>
                     </td>
                     <td style="font-size: 0.85rem; color: var(--text-light);">{{ $t->created_at->format('d/m H:i') }}</td>
                     <td>
                         <a href="{{ route('penjualan.transaksi.detail', $t) }}" class="btn btn-sm btn-secondary">
-                            <i class="fas fa-eye"></i>
+                            Lihat
                         </a>
                     </td>
                 </tr>

@@ -13,28 +13,45 @@
 @endsection
 
 @section('content')
-<div class="card" style="max-width:600px">
-    <div class="card-header"><h3>{{ isset($user) ? 'Edit User' : '➕ User Baru' }}</h3></div>
-    <div class="card-body">
+<div class="card" style="max-width:600px; margin:0 auto; border-left:5px solid var(--primary);">
+    <div class="card-header" style="padding:0.75rem 1.25rem;">
+        <h3 style="font-size:1rem;">@if(isset($user)) Edit User @else User Baru @endif</h3>
+    </div>
+    <div class="card-body" style="padding:0.75rem 1.25rem;">
         <form method="POST" action="{{ isset($user) ? route('owner.users.update', $user) : route('owner.users.store') }}">
             @csrf
             @if(isset($user)) @method('PUT') @endif
-            <div class="form-group"><label class="form-label">Nama *</label><input type="text" name="name" class="form-control" value="{{ old('name', $user->name ?? '') }}" required></div>
-            <div class="form-group"><label class="form-label">Email *</label><input type="email" name="email" class="form-control" value="{{ old('email', $user->email ?? '') }}" required></div>
-            <div class="form-group"><label class="form-label">Password {{ isset($user) ? '(kosongkan jika tidak diubah)' : '*' }}</label><input type="password" name="password" class="form-control" {{ isset($user) ? '' : 'required' }}></div>
-            <div class="form-group">
-                <label class="form-label">Role *</label>
-                <select name="role" class="form-control" required>
+            <div class="form-group" style="margin-bottom:0.5rem;">
+                <label class="form-label" style="margin-bottom:0.25rem;">Nama *</label>
+                <input type="text" name="name" class="form-control" style="padding:0.4rem 0.8rem;" value="{{ old('name', $user->name ?? '') }}" required>
+            </div>
+            <div class="form-group" style="margin-bottom:0.5rem;">
+                <label class="form-label" style="margin-bottom:0.25rem;">Email *</label>
+                <input type="email" name="email" class="form-control" style="padding:0.4rem 0.8rem;" value="{{ old('email', $user->email ?? '') }}" required>
+            </div>
+            <div class="form-group" style="margin-bottom:0.5rem;">
+                <label class="form-label" style="margin-bottom:0.25rem;">Password {{ isset($user) ? '(kosongkan jika tidak diubah)' : '*' }}</label>
+                <input type="password" name="password" class="form-control" style="padding:0.4rem 0.8rem;" {{ isset($user) ? '' : 'required' }}>
+            </div>
+            <div class="form-group" style="margin-bottom:0.5rem;">
+                <label class="form-label" style="margin-bottom:0.25rem;">Role *</label>
+                <select name="role" class="form-control" style="padding:0.4rem 0.8rem;" required>
                     @foreach(['owner'=>'Owner','admin_gudang'=>'Admin Gudang','admin_penjualan'=>'Admin Penjualan','admin_produksi'=>'Admin Produksi','customer'=>'Customer'] as $val => $label)
                         <option value="{{ $val }}" {{ old('role', $user->role ?? '') == $val ? 'selected' : '' }}>{{ $label }}</option>
                     @endforeach
                 </select>
             </div>
-            <div class="form-group"><label class="form-label">Telepon</label><input type="text" name="phone" class="form-control" value="{{ old('phone', $user->phone ?? '') }}"></div>
-            <div class="form-group"><label class="form-label">Alamat</label><textarea name="alamat" class="form-control">{{ old('alamat', $user->alamat ?? '') }}</textarea></div>
-            <div class="d-flex gap-1 mt-4">
-                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
-                <a href="{{ route('owner.users') }}" class="btn btn-secondary">Batal</a>
+            <div class="form-group" style="margin-bottom:0.5rem;">
+                <label class="form-label" style="margin-bottom:0.25rem;">Telepon</label>
+                <input type="text" name="phone" class="form-control" style="padding:0.4rem 0.8rem;" value="{{ old('phone', $user->phone ?? '') }}">
+            </div>
+            <div class="form-group" style="margin-bottom:0.75rem;">
+                <label class="form-label" style="margin-bottom:0.25rem;">Alamat</label>
+                <textarea name="alamat" class="form-control" style="padding:0.4rem 0.8rem; rows:2;">{{ old('alamat', $user->alamat ?? '') }}</textarea>
+            </div>
+            <div class="d-flex gap-1 mt-2">
+                <button type="submit" class="btn btn-primary" style="padding:0.4rem 0.9rem; font-size:0.9rem;">Simpan</button>
+                <a href="{{ route('owner.users') }}" class="btn btn-secondary" style="padding:0.4rem 0.9rem; font-size:0.9rem;">Batal</a>
             </div>
         </form>
     </div>

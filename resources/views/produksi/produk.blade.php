@@ -8,16 +8,17 @@
 <li><a href="{{ route('produksi.kategori') }}"><i class="fas fa-tags"></i> Kategori</a></li>
 <li><a href="{{ route('produksi.resep') }}"><i class="fas fa-book-open"></i> Resep</a></li>
 <li><a href="{{ route('produksi.input') }}"><i class="fas fa-plus-circle"></i> Input Produksi</a></li>
+<li><a href="{{ route('produksi.riwayat') }}"><i class="fas fa-history"></i> Detail Riwayat Produksi</a></li>
 <li><a href="{{ route('produksi.laporan') }}"><i class="fas fa-chart-bar"></i> Laporan</a></li>
 @endsection
 
 @section('content')
-<div class="action-header">
+<div class="action-header" style="border-left: 5px solid var(--primary);">
     <form method="GET" class="d-flex gap-1" style="flex: 1;"><input type="text" name="search" class="form-control" placeholder="Cari produk..." value="{{ request('search') }}" style="width:250px"><button class="btn btn-primary"><i class="fas fa-search"></i> Cari</button></form>
     <a href="{{ route('produksi.produk.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Tambah Produk</a>
 </div>
 
-<div class="card"><div class="table-responsive"><table>
+<div class="card" style="border-left: 5px solid var(--primary);"><div class="table-responsive"><table>
     <thead><tr><th>Produk</th><th>Kategori</th><th>Harga</th><th>Stok</th><th>Status</th><th>Aksi</th></tr></thead>
     <tbody>
         @foreach($produk as $p)

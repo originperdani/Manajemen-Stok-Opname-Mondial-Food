@@ -8,28 +8,26 @@
 <li><a href="{{ route('produksi.kategori') }}"><i class="fas fa-tags"></i> Kategori</a></li>
 <li><a href="{{ route('produksi.resep') }}"><i class="fas fa-book-open"></i> Resep</a></li>
 <li><a href="{{ route('produksi.input') }}"><i class="fas fa-plus-circle"></i> Input Produksi</a></li>
+<li><a href="{{ route('produksi.riwayat') }}"><i class="fas fa-history"></i> Detail Riwayat Produksi</a></li>
 <li><a href="{{ route('produksi.laporan') }}"><i class="fas fa-chart-bar"></i> Laporan</a></li>
 @endsection
 
 @section('content')
 <div class="stat-grid">
-    <div class="stat-card">
-        <div class="stat-icon blue"><i class="fas fa-birthday-cake"></i></div>
-        <div class="stat-info">
+    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+        <div class="stat-info" style="flex: 1;">
             <h4>Total Produk</h4>
             <p>{{ $totalProduk }}</p>
         </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-icon green"><i class="fas fa-book-open"></i></div>
-        <div class="stat-info">
+    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+        <div class="stat-info" style="flex: 1;">
             <h4>Total Resep</h4>
             <p>{{ $totalResep }}</p>
         </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-icon orange"><i class="fas fa-industry"></i></div>
-        <div class="stat-info">
+    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+        <div class="stat-info" style="flex: 1;">
             <h4>Produksi Hari Ini</h4>
             <p>{{ $produksiHariIni }}</p>
         </div>
@@ -37,9 +35,9 @@
 </div>
 
 @if($produkMenipis->count() > 0)
-<div class="card mb-4" style="border-color: var(--accent); background: var(--bg-warm);">
+<div class="card mb-4" style="border-color: var(--accent); background: var(--bg-warm); border-left: 5px solid var(--primary);">
     <div class="card-header" style="background: var(--secondary); border-bottom-color: var(--accent);">
-        <h3 style="color: var(--primary-dark);"><i class="fas fa-triangle-exclamation" style="margin-right: 0.5rem; color: var(--warning);"></i> Stok Produk Menipis - Segera Produksi!</h3>
+        <h3 style="color: var(--primary-dark);">Stok Produk Menipis - Segera Produksi!</h3>
     </div>
     <div class="card-body" style="padding:0">
         <table>
@@ -59,7 +57,7 @@
                     <td>{{ $p->stok_minimum }}</td>
                     <td>
                         <a href="{{ route('produksi.input', ['produk_id' => $p->id]) }}" class="btn btn-primary btn-sm">
-                            <i class="fas fa-plus"></i> Produksi Sekarang
+                            Produksi Sekarang
                         </a>
                     </td>
                 </tr>
@@ -70,10 +68,10 @@
 </div>
 @endif
 
-<div class="card">
+<div class="card" style="border-left: 5px solid var(--primary);">
     <div class="card-header">
-        <h3><i class="fas fa-history" style="color: var(--accent); margin-right: 0.5rem;"></i> Riwayat Produksi Terbaru</h3>
-        <a href="{{ route('produksi.input') }}" class="btn btn-secondary btn-sm">Input Produksi</a>
+        <h3>Riwayat Produksi Terbaru</h3>
+        <a href="{{ route('produksi.riwayat') }}" class="btn btn-primary btn-sm" style="background: var(--gradient-gold); border: none; color: white;">Detail Riwayat Produksi</a>
     </div>
     <div class="card-body" style="padding:0">
         <table>
@@ -91,7 +89,7 @@
                 <tr>
                     <td><strong>{{ $p->produk->nama_produk ?? '-' }}</strong></td>
                     <td style="font-weight: 700; color: var(--primary);">{{ $p->jumlah_produksi }}</td>
-                    <td style="font-size: 0.9rem;">{{ $p->user->name ?? '-' }}</td>
+                    <td style="font-size: 0.9rem;">{{ $p->user->penanggung_jawab ?? '-' }}</td>
                     <td>
                         <span class="badge badge-{{ $p->status=='selesai'?'success':'warning' }}">
                             {{ ucfirst($p->status) }}

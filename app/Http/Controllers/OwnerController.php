@@ -13,19 +13,45 @@ use Illuminate\Support\Facades\DB;
 
 class OwnerController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $totalProduk = Produk::count();
         $totalBahanBaku = BahanBaku::count();
-        $totalTransaksi = Transaksi::count();
-        $totalPendapatan = Transaksi::where('status', 'selesai')->sum('total');
         $totalUser = User::count();
-
-        $transaksiHariIni = Transaksi::whereDate('created_at', today())->count();
-        $pendapatanHariIni = Transaksi::whereDate('created_at', today())->where('status', 'selesai')->sum('total');
 
         $produkStokMenipis = Produk::whereColumn('stok', '<=', 'stok_minimum')->count();
         $bahanStokMenipis = BahanBaku::whereColumn('stok', '<=', 'stok_minimum')->count();
+
+        // Handle filter
+        $filterType = $request->filter_type ?? 'harian';
+        $tanggal = $request->tanggal ?? now()->toDateString();
+        $bulan = $request->bulan ?? date('m');
+        $tahun = $request->tahun ?? date('Y');
+
+        // Query untuk transaksi dan pendapatan sesuai filter
+        $transaksiQuery = Transaksi::query();
+        $pendapatanQuery = Transaksi::where('status', 'selesai');
+
+        $periodeLabel = '';
+        if ($filterType === 'harian') {
+            $transaksiQuery->whereDate('created_at', $tanggal);
+            $pendapatanQuery->whereDate('created_at', $tanggal);
+            $periodeLabel = now()->parse($tanggal)->translatedFormat('d F Y');
+        } elseif ($filterType === 'bulanan') {
+            $transaksiQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
+            $pendapatanQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
+            $periodeLabel = now()->parse($tahun.'-'.$bulan)->translatedFormat('F Y');
+        } elseif ($filterType === 'tahunan') {
+            $transaksiQuery->whereYear('created_at', $tahun);
+            $pendapatanQuery->whereYear('created_at', $tahun);
+            $periodeLabel = $tahun;
+        }
+
+        $totalTransaksi = $transaksiQuery->count();
+        $totalPendapatan = $pendapatanQuery->sum('total');
+
+        $transaksiHariIni = Transaksi::whereDate('created_at', today())->count();
+        $pendapatanHariIni = Transaksi::whereDate('created_at', today())->where('status', 'selesai')->sum('total');
 
         // Chart: Penjualan 7 hari terakhir
         $chartLabels = [];
@@ -43,7 +69,8 @@ class OwnerController extends Controller
             'totalProduk', 'totalBahanBaku', 'totalTransaksi', 'totalPendapatan',
             'totalUser', 'transaksiHariIni', 'pendapatanHariIni',
             'produkStokMenipis', 'bahanStokMenipis',
-            'chartLabels', 'chartData', 'transaksiTerbaru'
+            'chartLabels', 'chartData', 'transaksiTerbaru',
+            'filterType', 'tanggal', 'bulan', 'tahun', 'periodeLabel'
         ));
     }
 
@@ -125,10 +152,10 @@ class OwnerController extends Controller
         if ($request->status) {
             $query->where('status', $request->status);
         }
-        if ($request->dari && $request->sampai) {
-            $query->whereBetween('created_at', [$request->dari, $request->sampai . ' 23:59:59']);
+        if ($request->tanggal) {
+            $query->whereDate('created_at', $request->tanggal);
         }
-        $transaksi = $query->latest()->paginate(15);
+        $transaksi = $query->latest()->get();
         return view('owner.transaksi', compact('transaksi'));
     }
 

@@ -10,4 +10,8 @@ class StokLog extends Model
     protected $fillable = ['tipe', 'referensi_id', 'jenis', 'jumlah', 'stok_sebelum', 'stok_sesudah', 'keterangan', 'user_id'];
 
     public function user() { return $this->belongsTo(User::class, 'user_id'); }
+    
+    public function bahanBaku() { 
+        return $this->belongsTo(BahanBaku::class, 'referensi_id'); 
+    }
 }

@@ -5,14 +5,14 @@
     /* ===== PAGE HEADER ===== */
     .cart-header {
         background: #FDFDFC;
-        padding: 4rem 0;
+        padding: 5rem 0;
         border-bottom: 1px solid var(--border);
         text-align: center;
         margin-bottom: 4rem;
     }
     .cart-header h1 {
         font-family: 'Playfair Display', serif;
-        font-size: 2.75rem;
+        font-size: 2.5rem;
         background: linear-gradient(135deg, var(--text-dark) 0%, var(--text-dark) 30%, var(--primary) 50%, var(--accent) 70%, var(--accent) 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -117,6 +117,48 @@
     }
     .btn-remove:hover { background: #FEE2E2; transform: scale(1.05); }
 
+    /* ===== CART BUTTONS ===== */
+    .cart-btn {
+        width: 100%;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        text-decoration: none;
+    }
+
+    .cart-btn-primary {
+        background: var(--gradient-gold);
+        color: white;
+        box-shadow: 0 4px 15px rgba(122, 75, 34, 0.2);
+        margin-top: 2rem;
+    }
+
+    .cart-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(122, 75, 34, 0.3);
+        background: var(--gradient-dark);
+    }
+
+    .cart-btn-secondary {
+        background: var(--bg-alt);
+        color: var(--text-dark);
+        margin-top: 1rem;
+    }
+
+    .cart-btn-secondary:hover {
+        background: var(--surface-soft);
+        transform: translateY(-2px);
+    }
+
     /* ===== SUMMARY CARD ===== */
     .summary-card {
         background: white;
@@ -157,7 +199,7 @@
     /* ===== EMPTY STATE ===== */
     .empty-cart {
         text-align: center;
-        padding: 6rem 2rem;
+        padding: 4rem 2rem;
         background: white;
         border-radius: 32px;
         border: 1px solid var(--border);
@@ -165,17 +207,149 @@
         margin: 4rem auto 8rem;
     }
     .empty-icon {
-        font-size: 5rem;
+        font-size: 3.5rem;
         color: var(--border);
+        margin-bottom: 1.5rem;
+    }
+    .empty-cart h2 {
+        font-size: 1.5rem;
+        margin-bottom: 0.75rem;
+        color: var(--text-dark);
+    }
+    .empty-cart p {
+        font-size: 0.95rem;
+        color: var(--text-light);
         margin-bottom: 2rem;
     }
 
-    @media (max-width: 991px) {
-        .cart-grid { grid-template-columns: 1fr; }
-        .summary-card { position: static; }
-        .cart-item { flex-wrap: wrap; gap: 1rem; }
-        .item-total { order: 4; width: 100%; text-align: left; min-width: 0; }
-        .btn-remove { position: absolute; top: 1.5rem; right: 1.5rem; }
+    @media (max-width: 1024px) {
+        .cart-grid {
+            grid-template-columns: 1fr;
+            max-width: 820px;
+            gap: 2rem;
+        }
+
+        .summary-card {
+            position: static;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .cart-header {
+            padding: 3rem 0 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .cart-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .cart-header p {
+            font-size: 0.9rem;
+            padding: 0 1rem;
+        }
+        
+        .cart-grid {
+            grid-template-columns: 1fr;
+            padding: 0 1.25rem 3rem;
+            gap: 2rem;
+        }
+        
+        .cart-item {
+            padding: 1.25rem;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .item-media {
+            width: 80px;
+            height: 80px;
+            font-size: 2.5rem;
+        }
+        
+        .item-title {
+            font-size: 1rem;
+        }
+        
+        .summary-card {
+            padding: 1.5rem;
+            position: static;
+        }
+        
+        .summary-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .total-value {
+            font-size: 1.25rem;
+        }
+        
+        .empty-cart {
+            padding: 2.5rem 1.25rem;
+            margin: 2rem auto 4rem;
+        }
+        
+        .empty-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .empty-cart h2 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .empty-cart p {
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .cart-item {
+            display: grid;
+            grid-template-columns: 72px 1fr auto;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .item-media {
+            grid-row: span 2;
+            width: 72px;
+            height: 72px;
+            font-size: 2rem;
+        }
+
+        .item-info {
+            min-width: 0;
+        }
+
+        .item-title {
+            display: block;
+            overflow-wrap: anywhere;
+        }
+
+        .item-qty {
+            grid-column: 2;
+        }
+
+        .item-total {
+            grid-column: 2 / 4;
+            min-width: 0;
+            text-align: left;
+        }
+
+        .cart-item > form {
+            grid-column: 3;
+            grid-row: 1 / span 2;
+        }
+
+        .btn-remove {
+            width: 36px;
+            height: 36px;
+        }
     }
 </style>
 @endsection
@@ -183,8 +357,8 @@
 @section('content')
 <header class="cart-header">
     <div class="container">
-        <h1>Keranjang Belanja</h1>
-        <p>Tinjau item pilihan Anda sebelum melakukan pemesanan.</p>
+        <h1 class="reveal fade-bottom">Keranjang Belanja</h1>
+        <p class="reveal fade-bottom delay-100">Tinjau item pilihan Anda sebelum melakukan pemesanan.</p>
     </div>
 </header>
 
@@ -193,7 +367,7 @@
         <div class="cart-grid">
             <main>
                 @foreach($items as $item)
-                    <div class="cart-item">
+                    <div class="cart-item reveal reveal-slower fade-bottom delay-{{ ($loop->index % 3 + 1) * 100 }}">
                         <div class="item-media">
                             @if($item->produk->gambar)
                                 <img src="{{ str_starts_with($item->produk->gambar, 'http') ? $item->produk->gambar : asset('storage/' . $item->produk->gambar) }}" 
@@ -234,7 +408,7 @@
             </main>
 
             <aside>
-                <div class="summary-card">
+                <div class="summary-card reveal fade-left">
                     <h3><i class="fa-solid fa-receipt"></i> Ringkasan Belanja</h3>
                     <div class="summary-row">
                         <span>Total Item</span>
@@ -250,23 +424,31 @@
                         <span class="total-value">Rp {{ number_format($total, 0, ',', '.') }}</span>
                     </div>
                     
-                    <a href="{{ route('customer.checkout') }}" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 2rem;">
-                        Proses Checkout <i class="fa-solid fa-arrow-right" style="margin-left: 0.5rem;"></i>
-                    </a>
-                    <a href="{{ route('katalog') }}" class="btn btn-secondary" style="width: 100%; margin-top: 1rem; border: none;">
-                        Lanjut Belanja
-                    </a>
+                    <form action="{{ route('customer.checkout') }}" method="GET" style="width: 100%;">
+                        <button type="submit" class="cart-btn cart-btn-primary">
+                            Proses Checkout <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </form>
+                    <form action="{{ route('katalog') }}" method="GET" style="width: 100%;">
+                        <button type="submit" class="cart-btn cart-btn-secondary">
+                            Lanjut Belanja
+                        </button>
+                    </form>
                 </div>
             </aside>
         </div>
     @else
-        <div class="empty-cart">
+        <div class="empty-cart reveal fade-bottom">
             <div class="empty-icon">
                 <i class="fa-solid fa-cart-shopping"></i>
             </div>
-            <h2 style="font-size: 1.75rem; margin-bottom: 1rem; color: var(--text-dark);">Keranjang Anda Kosong</h2>
-            <p style="color: var(--text-light); margin-bottom: 2.5rem;">Sepertinya Anda belum memilih roti atau kue favorit. Yuk, jelajahi katalog kami!</p>
-            <a href="{{ route('katalog') }}" class="btn btn-primary btn-lg">Mulai Belanja</a>
+            <h2>Keranjang Anda Kosong</h2>
+            <p>Sepertinya Anda belum memilih roti atau kue favorit. Yuk, jelajahi katalog kami!</p>
+            <form action="{{ route('katalog') }}" method="GET" style="display: inline-block;">
+                <button type="submit" class="cart-btn cart-btn-primary" style="display: inline-flex; width: auto; margin-top: 0;">
+                    Mulai Belanja
+                </button>
+            </form>
         </div>
     @endif
 </div>

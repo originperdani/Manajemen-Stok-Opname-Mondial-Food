@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar - Mondial Bakery</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/Logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/Logo.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -366,7 +368,7 @@
                 <div class="register-left-logo">
                     <img src="{{ asset('images/Logo.png') }}" alt="Mondial Bakery">
                 </div>
-                <h1>Join the Sweetness.</h1>
+                <h1>Yuk, Bergabung Bersama Kami!</h1>
                 <p>Jadilah bagian dari komunitas Mondial Bakery dan nikmati kemudahan memesan roti premium langsung dari genggaman Anda.</p>
                 <div class="features">
                     <div class="feature-item">
@@ -496,6 +498,23 @@
             if (event.key === 'F7') {
                 event.preventDefault();
             }
+        });
+    </script>
+    <script>
+        // Validasi Bahasa Indonesia
+        document.querySelectorAll('input[required], select[required], textarea[required]').forEach(function(el) {
+            el.addEventListener('invalid', function() {
+                if (this.validity.valueMissing) {
+                    this.setCustomValidity('Harap isi kolom ini.');
+                } else if (this.validity.typeMismatch && this.type === 'email') {
+                    this.setCustomValidity('Harap masukkan alamat email yang valid.');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+            el.addEventListener('input', function() {
+                this.setCustomValidity('');
+            });
         });
     </script>
 </body>

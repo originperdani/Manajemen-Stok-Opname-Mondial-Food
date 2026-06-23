@@ -9,6 +9,7 @@ use App\Models\BahanBaku;
 use App\Models\Produksi;
 use App\Models\StokLog;
 use App\Models\KategoriProduk;
+use App\Helpers\CacheHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -119,22 +120,23 @@ class ProduksiController extends Controller
     // RESEP
     public function resep()
     {
-        $resep = Resep::with('produk', 'detail.bahanBaku')->latest()->paginate(15);
+        $resep = Resep::with('produk', 'kategori', 'detail.bahanBaku')->latest()->paginate(15);
         return view('produksi.resep', compact('resep'));
     }
 
     public function createResep()
     {
-        $produk = Produk::all();
+        $kategori = KategoriProduk::all();
         $bahanBaku = BahanBaku::all();
-        return view('produksi.resep-form', compact('produk', 'bahanBaku'));
+        return view('produksi.resep-form', compact('kategori', 'bahanBaku'));
     }
 
     public function storeResep(Request $request)
     {
         $request->validate([
-            'produk_id' => 'required|exists:produk,id',
             'nama_resep' => 'required|string|max:255',
+            'nama_produk' => 'required|string|max:255',
+            'kategori_id' => 'required|exists:kategori_produk,id',
             'bahan' => 'required|array|min:1',
             'bahan.*.bahan_baku_id' => 'required|exists:bahan_baku,id',
             'bahan.*.jumlah' => 'required|numeric|min:0.01',
@@ -142,9 +144,22 @@ class ProduksiController extends Controller
 
         DB::beginTransaction();
         try {
+            // Cari atau buat produk baru
+            $produk = Produk::firstOrCreate(
+                ['nama_produk' => $request->nama_produk],
+                [
+                    'kategori_id' => $request->kategori_id,
+                    'harga' => 0, // Default harga, bisa diupdate nanti
+                    'stok' => 0,
+                    'stok_minimum' => 5,
+                ]
+            );
+
             $resep = Resep::create([
-                'produk_id' => $request->produk_id,
+                'produk_id' => $produk->id,
                 'nama_resep' => $request->nama_resep,
+                'nama_produk' => $request->nama_produk,
+                'kategori_id' => $request->kategori_id,
                 'instruksi' => $request->instruksi,
                 'hasil_produksi' => $request->hasil_produksi ?? 1,
                 'waktu_produksi' => $request->waktu_produksi,
@@ -179,6 +194,12 @@ class ProduksiController extends Controller
     {
         $resep = Resep::with('produk')->get();
         return view('produksi.input-produksi', compact('resep'));
+    }
+
+    public function riwayatProduksi()
+    {
+        $produksi = Produksi::with('produk', 'user')->latest()->paginate(15);
+        return view('produksi.riwayat', compact('produksi'));
     }
 
     public function prosesProduksi(Request $request)
@@ -242,6 +263,7 @@ class ProduksiController extends Controller
                 'catatan' => $request->catatan,
             ]);
 
+            CacheHelper::bumpVersion('produk');
             DB::commit();
             return redirect()->route('produksi.dashboard')->with('success', "Produksi berhasil! {$hasilTotal} {$resep->produk->nama_produk} telah ditambahkan ke stok.");
         } catch (\Exception $e) {

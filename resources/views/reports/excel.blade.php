@@ -41,28 +41,74 @@
             <tr>
                 <td style="font-weight: bold;">{{ strtoupper($section['title']) }}</td>
             </tr>
-            <tr>
-                @foreach($section['headers'] as $header)
-                    <th style="background-color: #f2f2f2; font-weight: bold; border: 1px solid #000000;">{{ $header }}</th>
-                @endforeach
-            </tr>
-            @forelse($section['rows'] as $row)
+
+            @if($report['module'] === 'gudang' && isset($section['headers_masuk']))
+                <!-- Stok Masuk -->
                 <tr>
-                    @foreach($row as $cell)
-                        <td style="border: 1px solid #000000;">{{ $cell }}</td>
+                    <td style="font-weight: bold;">STOK MASUK</td>
+                </tr>
+                <tr>
+                    @foreach($section['headers_masuk'] as $header)
+                        <th style="background-color: #f2f2f2; font-weight: bold; border: 1px solid #000000;">{{ $header }}</th>
                     @endforeach
                 </tr>
-            @empty
+                @forelse($section['rows_masuk'] as $row)
+                    <tr>
+                        @foreach($row as $cell)
+                            <td style="border: 1px solid #000000;">{{ $cell }}</td>
+                        @endforeach
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="{{ count($section['headers_masuk']) }}" style="text-align: center; border: 1px solid #000000;">Tidak ada data</td>
+                    </tr>
+                @endforelse
+                <tr><td></td></tr>
+
+                <!-- Stok Keluar -->
                 <tr>
-                    <td colspan="{{ count($section['headers']) }}" style="text-align: center; border: 1px solid #000000;">Tidak ada data</td>
+                    <td style="font-weight: bold;">STOK KELUAR</td>
                 </tr>
-            @endforelse
+                <tr>
+                    @foreach($section['headers_keluar'] as $header)
+                        <th style="background-color: #f2f2f2; font-weight: bold; border: 1px solid #000000;">{{ $header }}</th>
+                    @endforeach
+                </tr>
+                @forelse($section['rows_keluar'] as $row)
+                    <tr>
+                        @foreach($row as $cell)
+                            <td style="border: 1px solid #000000;">{{ $cell }}</td>
+                        @endforeach
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="{{ count($section['headers_keluar']) }}" style="text-align: center; border: 1px solid #000000;">Tidak ada data</td>
+                    </tr>
+                @endforelse
+            @else
+                <tr>
+                    @foreach($section['headers'] as $header)
+                        <th style="background-color: #f2f2f2; font-weight: bold; border: 1px solid #000000;">{{ $header }}</th>
+                    @endforeach
+                </tr>
+                @forelse($section['rows'] as $row)
+                    <tr>
+                        @foreach($row as $cell)
+                            <td style="border: 1px solid #000000;">{{ $cell }}</td>
+                        @endforeach
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="{{ count($section['headers']) }}" style="text-align: center; border: 1px solid #000000;">Tidak ada data</td>
+                    </tr>
+                @endforelse
+            @endif
             <tr><td></td></tr>
         @endforeach
 
         <tr><td></td></tr>
         <tr>
-            <td>Jakarta, {{ date('d/m/Y') }}</td>
+            <td>Depok, {{ date('d/m/Y') }}</td>
         </tr>
         <tr>
             <td>Mengetahui,</td>

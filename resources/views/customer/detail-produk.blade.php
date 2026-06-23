@@ -4,24 +4,25 @@
 <style>
     /* ===== DETAIL CONTAINER (MB1 Placement + MB Styles) ===== */
     .detail-container {
-        max-width: 1280px;
-        margin: 4rem auto;
+        max-width: 1000px;
+        margin: 2rem auto;
         padding: 0 1.5rem;
         display: grid;
-        grid-template-columns: 1.1fr 1fr;
-        gap: 5rem;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
         align-items: start;
     }
 
     /* ===== IMAGE GALLERY ===== */
     .detail-media {
         background: rgba(255,255,255,0.82);
-        border-radius: 34px;
-        aspect-ratio: 1/1;
+        border-radius: 24px;
+        aspect-ratio: 4/3;
+        max-width: 400px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 8rem;
+        font-size: 6rem;
         overflow: hidden;
         border: 1px solid rgba(255,255,255,0.88);
         box-shadow: var(--shadow-md);
@@ -71,40 +72,40 @@
     }
 
     .detail-title {
-        font-size: clamp(2rem, 4vw, 3rem);
+        font-size: clamp(1.5rem, 3vw, 2rem);
         color: var(--text-dark);
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
         line-height: 1.2;
         font-weight: 700;
         font-family: 'Playfair Display', serif;
     }
 
     .detail-price {
-        font-size: 2.25rem;
+        font-size: 1.75rem;
         font-weight: 700;
         color: var(--primary);
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
         display: flex;
         align-items: center;
-        gap: 1.2rem;
+        gap: 1rem;
     }
 
     .detail-desc {
         color: var(--text-medium);
-        font-size: 1.05rem;
-        line-height: 1.8;
-        margin-bottom: 2.5rem;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
     }
 
     /* ===== META GRID ===== */
     .detail-meta-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 1.5rem;
-        margin-bottom: 3rem;
-        padding: 2rem;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
         background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,244,231,0.82));
-        border-radius: 24px;
+        border-radius: 16px;
         border: 1px solid rgba(122, 75, 34, 0.08);
     }
 
@@ -326,17 +327,82 @@
         }
     }
 
-    @media (max-width: 640px) {
-        .detail-meta-grid {
-            grid-template-columns: 1fr;
+    @media (max-width: 768px) {
+        .detail-container {
+            padding: 0 1.25rem;
+            gap: 2rem;
         }
-
-        .qty-selector {
-            flex-wrap: wrap;
+        
+        .detail-media {
+            max-width: 100%;
+            aspect-ratio: 1/1;
         }
-
+        
         .detail-title {
-            font-size: 2rem;
+            font-size: 1.5rem !important;
+        }
+        
+        .detail-price {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .detail-desc {
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+        
+        .detail-meta-grid {
+            padding: 1.25rem;
+            gap: 0.75rem;
+        }
+        
+        .meta-value {
+            font-size: 0.9rem;
+        }
+        
+        .qty-btn {
+            width: 40px;
+            height: 40px;
+            font-size: 1.1rem;
+        }
+        
+        .qty-input {
+            width: 60px;
+            height: 40px;
+            font-size: 1rem;
+        }
+        
+        .btn-cart-premium {
+            height: 50px;
+            font-size: 0.95rem;
+        }
+        
+        .related-section {
+            padding: 0 1.25rem;
+            margin: 3rem auto;
+        }
+        
+        .related-title {
+            font-size: 1.35rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .products-grid {
+            gap: 1.25rem;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        }
+        
+        .product-body-sm {
+            padding: 1.25rem;
+        }
+        
+        .product-title-sm {
+            font-size: 0.95rem;
+        }
+        
+        .product-price-sm {
+            font-size: 1rem;
         }
     }
 </style>
@@ -414,7 +480,7 @@
                     </form>
                 @endif
             @else
-                <a href="{{ route('login') }}" class="btn btn-primary btn-lg" style="width: 100%">
+                <a href="{{ route('login') }}" class="btn-cart-premium" style="text-decoration: none;">
                     <i class="fa-solid fa-right-to-bracket"></i> Masuk untuk Belanja
                 </a>
             @endauth

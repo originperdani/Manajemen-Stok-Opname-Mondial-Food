@@ -10,35 +10,120 @@
 @endsection
 
 @section('content')
-<div class="action-header">
+<style>
+    .contact-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    .contact-actions a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        text-decoration: none;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+    .contact-actions a:hover {
+        text-decoration: underline;
+    }
+    .contact-actions .wa-link { color: #25D366; }
+    .contact-actions .email-link { color: #1a73e8; }
+</style>
+
+<div class="action-header" style="border-left: 5px solid var(--primary);">
     <form method="GET" class="d-flex gap-1" style="flex: 1; flex-wrap: wrap">
         <input type="text" name="search" class="form-control" placeholder="Cari kode transaksi..." value="{{ request('search') }}" style="width:250px">
         <select name="status" class="form-control" style="width:150px" onchange="this.form.submit()">
             <option value="">Semua Status</option>
-            @foreach(['pending','diproses','dikirim','selesai','dibatalkan'] as $s)
-                <option value="{{ $s }}" {{ request('status')==$s?'selected':'' }}>{{ ucfirst($s) }}</option>
+            @foreach(['belum_bayar','pending','diproses','dikirim','selesai','dibatalkan'] as $s)
+                <option value="{{ $s }}" {{ request('status')==$s?'selected':'' }}>{{ ucfirst(str_replace('_',' ', $s)) }}</option>
             @endforeach
         </select>
-        <button class="btn btn-primary"><i class="fas fa-search"></i> Cari</button>
+        <button class="btn btn-primary">Cari</button>
     </form>
 </div>
 
-<div class="card"><div class="table-responsive"><table>
-    <thead><tr><th>Kode</th><th>Customer</th><th>Tipe</th><th>Total</th><th>Bayar</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr></thead>
+<div class="card" style="border-left: 5px solid var(--primary);"><div class="table-responsive"><table>
+    <thead><tr><th>Kode</th><th>Customer</th><th>Kontak</th><th>Tipe</th><th>Total</th><th>Bayar</th><th style="text-align:center">Status</th><th>Tanggal</th><th>Aksi</th></tr></thead>
     <tbody>
         @foreach($transaksi as $t)
+        @php
+            $customerName = $t->pengiriman->nama_penerima ?? $t->nama_pelanggan ?? $t->user->name ?? 'Customer';
+            $phone = $t->pengiriman->phone_penerima ?? $t->phone_pelanggan;
+            $email = trim((string) ($t->email_pelanggan ?? ''));
+            $validEmail = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : null;
+
+            $isPickup = $t->pengiriman && in_array($t->pengiriman->metode_kirim, ['ambil_sendiri']);
+            $displayStatus = $t->status;
+            if ($isPickup && $t->status === 'dikirim') {
+                $displayStatus = 'siap diambil';
+            }
+
+            $productList = '';
+            foreach ($t->detail as $item) {
+                $productList .= "- " . ($item->produk->nama_produk ?? 'Produk') . " x " . $item->jumlah . "\n";
+            }
+
+            $message = "Yth. " . $customerName . ",\n\n"
+                . "Berikut update pesanan Anda di Mondial Bakery.\n\n"
+                . "Kode Pesanan: " . $t->kode_transaksi . "\n"
+                . "Status: " . ucfirst(str_replace('_', ' ', $displayStatus)) . "\n"
+                . "Detail Pesanan:\n" . trim($productList) . "\n"
+                . "Total: Rp " . number_format($t->total, 0, ',', '.') . "\n\n"
+                . "Terima kasih telah berbelanja di Mondial Bakery.";
+
+            $whatsappUrl = null;
+            if ($phone) {
+                $whatsappPhone = preg_replace('/[^0-9]/', '', $phone);
+                if (substr($whatsappPhone, 0, 1) === '0') {
+                    $whatsappPhone = '62' . substr($whatsappPhone, 1);
+                }
+                $whatsappUrl = "https://wa.me/" . $whatsappPhone . "?text=" . urlencode($message);
+            }
+
+            $emailUrl = null;
+            if ($validEmail) {
+                $emailUrl = "https://mail.google.com/mail/?" . http_build_query([
+                    'authuser' => config('mail.from.address'),
+                    'view' => 'cm',
+                    'fs' => '1',
+                    'to' => $validEmail,
+                    'su' => "Update Pesanan " . $t->kode_transaksi . " - Mondial Bakery",
+                    'body' => $message,
+                ], '', '&', PHP_QUERY_RFC3986);
+            }
+        @endphp
         <tr>
             <td><strong>{{ $t->kode_transaksi }}</strong></td>
             <td>{{ $t->user->name ?? $t->nama_pelanggan ?? 'Walk-in' }}</td>
+            <td>
+                @if($whatsappUrl || $emailUrl)
+                    <div class="contact-actions">
+                        @if($whatsappUrl)
+                            <a href="{{ $whatsappUrl }}" target="_blank" rel="noopener noreferrer" class="wa-link" title="Kirim WhatsApp ke {{ $phone }}">
+                                <i class="fab fa-whatsapp"></i> WA
+                            </a>
+                        @endif
+                        @if($emailUrl)
+                            <a href="{{ $emailUrl }}" target="_blank" rel="noopener noreferrer" class="email-link" title="Kirim email ke {{ $validEmail }}">
+                                <i class="fas fa-envelope"></i> Email
+                            </a>
+                        @endif
+                    </div>
+                @else
+                    -
+                @endif
+            </td>
             <td><span class="badge badge-{{ $t->tipe=='pos'?'info':'primary' }}">{{ strtoupper($t->tipe) }}</span></td>
             <td style="font-weight:600">Rp {{ number_format($t->total, 0, ',', '.') }}</td>
             <td>{{ $t->pembayaran->metode_label ?? '-' }}</td>
-            <td><span class="badge badge-{{ match($t->status) { 'selesai'=>'success','pending'=>'warning','dibatalkan'=>'danger',default=>'info' } }}">{{ ucfirst($t->status) }}</span></td>
+            <td style="text-align:center"><span class="badge badge-{{ match($t->status) { 'selesai'=>'success','pending'=>'warning','belum_bayar'=>'danger','dibatalkan'=>'danger',default=>'info' } }}">{{ ucfirst(str_replace('_',' ', $displayStatus)) }}</span></td>
             <td>{{ $t->created_at->format('d/m/Y H:i') }}</td>
-            <td><a href="{{ route('penjualan.transaksi.detail', $t) }}" class="btn btn-sm btn-secondary"><i class="fas fa-eye"></i></a></td>
+            <td><a href="{{ route('penjualan.transaksi.detail', $t) }}" class="btn btn-sm btn-secondary">Lihat</a></td>
         </tr>
         @endforeach
     </tbody>
 </table></div></div>
-{{ $transaksi->withQueryString()->links() }}
 @endsection

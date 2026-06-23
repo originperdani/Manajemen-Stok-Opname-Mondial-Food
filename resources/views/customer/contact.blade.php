@@ -5,35 +5,42 @@
 <style>
     .page-header {
         position: relative;
+        padding: 5rem 0;
         background: #ffffff;
-        padding: 4rem 0;
-        width: 100%;
-        overflow: hidden;
-        z-index: 1;
         text-align: center;
+        overflow: hidden;
     }
 
     .page-header::before {
         content: '';
         position: absolute;
-        top: 0;
-        bottom: 0;
-        left: -10px;
-        right: -10px;
+        inset: 0;
         background-image: 
-            /* Motif Batik Geometris Modern (Truntum Style) - Sama dengan Beranda */
             linear-gradient(30deg, rgba(122, 75, 34, 0.015) 12%, transparent 12.5%, transparent 87%, rgba(122, 75, 34, 0.015) 87.5%, rgba(122, 75, 34, 0.015)),
             linear-gradient(150deg, rgba(122, 75, 34, 0.015) 12%, transparent 12.5%, transparent 87%, rgba(122, 75, 34, 0.015) 87.5%, rgba(122, 75, 34, 0.015)),
-            linear-gradient(30deg, rgba(122, 75, 34, 0.015) 12%, transparent 12.5%, transparent 87%, rgba(122, 75, 34, 0.015) 87.5%, rgba(122, 75, 34, 0.015)),
-            linear-gradient(150deg, rgba(122, 75, 34, 0.015) 12%, transparent 12.5%, transparent 87%, rgba(122, 75, 34, 0.015) 87.5%, rgba(122, 75, 34, 0.015)),
-            linear-gradient(60deg, rgba(199, 131, 77, 0.01) 25%, transparent 25.5%, transparent 75%, rgba(199, 131, 77, 0.01) 75%, rgba(199, 131, 77, 0.01)),
             linear-gradient(60deg, rgba(199, 131, 77, 0.01) 25%, transparent 25.5%, transparent 75%, rgba(199, 131, 77, 0.01) 75%, rgba(199, 131, 77, 0.01));
         background-size: 40px 70px;
-        background-position: center;
-        background-repeat: repeat;
         opacity: 0.8;
-        pointer-events: none;
         z-index: 0;
+    }
+
+    .page-header h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, var(--text-dark) 0%, var(--text-dark) 30%, var(--primary) 50%, var(--accent) 70%, var(--accent) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        color: var(--text-light);
+        max-width: 600px;
+        margin: 0 auto;
     }
 
     .contact-section {
@@ -203,6 +210,22 @@
         font-weight: 500;
     }
 
+    .email-contact-link {
+        display: inline-flex;
+        align-items: center;
+        color: var(--text-dark);
+        text-decoration: none;
+        font-size: 0.95rem;
+        font-weight: 700;
+        word-break: break-word;
+        transition: color 0.25s ease;
+    }
+
+    .email-contact-link:hover {
+        color: var(--primary);
+        text-decoration: underline;
+    }
+
     .opening-hours-detail {
         margin-top: 0.5rem;
         display: grid;
@@ -231,49 +254,137 @@
     }
 
     .social-icon {
-        width: 48px;
-        height: 48px;
-        background: #fff;
-        color: var(--primary) !important;
+        width: 56px;
+        height: 56px;
+        background: var(--primary);
+        color: #fff !important;
         border-radius: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
         text-decoration: none;
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        border: 1px solid rgba(122, 75, 34, 0.1);
-        font-size: 1.25rem;
-        box-shadow: 0 4px 12px rgba(122, 75, 34, 0.06);
+        border: none;
+        font-size: 1.5rem;
+        box-shadow: 0 8px 20px rgba(122, 75, 34, 0.35);
     }
 
     .social-icon:hover {
         transform: translateY(-8px) rotate(8deg);
-        background: var(--primary);
+        background: var(--primary-dark);
         color: #fff !important;
-        box-shadow: 0 12px 25px rgba(122, 75, 34, 0.2);
-        border-color: var(--primary);
+        box-shadow: 0 14px 30px rgba(122, 75, 34, 0.45);
     }
 
     @media (max-width: 992px) {
         .contact-grid {
             grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 1.5rem 0 1.25rem;
+        }
+        
+        .page-header h1 {
+            font-size: 1.3rem;
+            margin-bottom: 0.35rem;
+        }
+        
+        .page-header p {
+            font-size: 0.75rem;
+            padding: 0 1rem;
+        }
+        
+        .contact-section {
+            padding: 2rem 0;
+        }
+        
+        .contact-container {
+            padding: 0 1.25rem;
+        }
+        
+        .info-card {
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .info-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        
+        .admin-item {
+            padding: 1rem;
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+        
+        .wa-btn {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .info-list-item {
+            padding: 1rem;
+        }
+        
+        .info-content-label {
+            font-size: 0.7rem;
+        }
+        
+        .info-content-value {
+            font-size: 0.85rem;
+        }
+        
+        .hour-row {
+            font-size: 0.75rem;
+            padding: 0.3rem 0.6rem;
+        }
+        
+        .map-container {
+            height: 280px;
+        }
+        
+        .social-links {
+            gap: 1rem;
+            padding-top: 1rem;
+        }
+        
+        .social-icon {
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
         }
     }
 </style>
 @endsection
 
 @section('content')
-<section class="page-header">
-    <div class="container reveal fade-bottom">
-        <h1 style="position: relative; z-index: 1; font-family: 'Playfair Display', serif; font-size: 2.5rem; background: linear-gradient(135deg, var(--text-dark) 0%, var(--text-dark) 30%, var(--primary) 50%, var(--accent) 70%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; margin: 0;">
-            Hubungi Kami
-        </h1>
-        <p class="text-muted" style="position: relative; z-index: 1; margin-top: 0.5rem;">Kami siap melayani Anda dengan sepenuh hati</p>
+<header class="page-header">
+    <div class="container">
+        <h1 class="reveal fade-bottom">Hubungi Kami</h1>
+        <p class="reveal fade-bottom delay-100">Kami siap melayani Anda dengan sepenuh hati</p>
     </div>
-</section>
+</header>
 
 <section class="contact-section">
     <div class="contact-container">
+        @php
+            $contactEmail = 'mondialfood.co@gmail.com';
+            $contactEmailUrl = 'https://mail.google.com/mail/?' . http_build_query([
+                'view' => 'cm',
+                'fs' => '1',
+                'to' => $contactEmail,
+                'su' => 'Pertanyaan Seputar Mondial Bakery',
+                'body' => "Halo Admin Mondial Bakery,\n\nSaya ingin bertanya mengenai produk/pemesanan Mondial Bakery.\n\nNama:\nNo. WhatsApp:\nPertanyaan:\n\nTerima kasih.",
+            ], '', '&', PHP_QUERY_RFC3986);
+        @endphp
         <div class="contact-grid">
             <!-- Left Side: Contact Info -->
             <div class="contact-info">
@@ -308,14 +419,18 @@
                             <i class="fas fa-envelope"></i>
                             <div>
                                 <span class="info-content-label">Email Kami</span>
-                                <span class="info-content-value">info@mondialbakery.com</span>
+                                <a href="{{ $contactEmailUrl }}" target="_blank" rel="noopener noreferrer" class="email-contact-link" title="Kirim email ke {{ $contactEmail }}">
+                                    {{ $contactEmail }}
+                                </a>
                             </div>
                         </div>
                         <div class="info-list-item">
                             <i class="fab fa-instagram"></i>
                             <div>
                                 <span class="info-content-label">Instagram</span>
-                                <span class="info-content-value">@mondialbakery</span>
+                                <a href="https://www.instagram.com/mondialbakery?igsh=aWhpMXA4djFwdDNh" target="_blank" rel="noopener noreferrer" style="color: var(--text-dark); text-decoration: none;">
+                                    <span class="info-content-value">@mondialbakery</span>
+                                </a>
                             </div>
                         </div>
                         <div class="info-list-item">
@@ -337,7 +452,7 @@
                     </div>
                     
                     <div class="social-links">
-                        <a href="#" class="social-icon" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.instagram.com/mondialbakery?igsh=aWhpMXA4djFwdDNh" target="_blank" rel="noopener noreferrer" class="social-icon" title="Instagram"><i class="fab fa-instagram"></i></a>
                         <a href="#" class="social-icon" title="Facebook"><i class="fab fa-facebook-f"></i></a>
                         <a href="#" class="social-icon" title="TikTok"><i class="fab fa-tiktok"></i></a>
                     </div>

@@ -20,6 +20,7 @@ class Pengiriman extends Model
         return match($this->metode_kirim) {
             'ambil_sendiri' => 'Ambil Sendiri',
             'kurir_toko' => 'Kurir Toko',
+            'kurir_ojol' => 'Kurir Toko / Ojek Online',
             'grabfood' => 'GrabFood',
             'gofood' => 'GoFood',
             default => $this->metode_kirim,
