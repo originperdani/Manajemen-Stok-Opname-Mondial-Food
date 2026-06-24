@@ -23,8 +23,14 @@ class MidtransWebhookController extends Controller
             $orderId = $notif->order_id;
             $fraudStatus = $notif->fraud_status;
             
-            // Strip retry suffix (e.g. -R1, -R2) to find original transaction
+            // Strip retry suffix (e.g. -R1, -R2)
             $kodeTransaksi = preg_replace('/-R\d+$/', '', $orderId);
+            
+            // Strip environment prefix if configured
+            $prefix = config('midtrans.order_prefix', '');
+            if ($prefix && str_starts_with($kodeTransaksi, $prefix)) {
+                $kodeTransaksi = substr($kodeTransaksi, strlen($prefix));
+            }
             
             // Find transaction by kode_transaksi
             $transaksi = Transaksi::where('kode_transaksi', $kodeTransaksi)->first();

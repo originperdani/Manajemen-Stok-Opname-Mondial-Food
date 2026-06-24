@@ -3,11 +3,10 @@
 $clientKey = trim((string) env('MIDTRANS_CLIENT_KEY', ''));
 $serverKey = trim((string) env('MIDTRANS_SERVER_KEY', ''));
 $environment = strtolower(trim((string) env('MIDTRANS_ENV', 'sandbox')));
-$looksLikeProductionKey = str_starts_with($clientKey, 'Mid-client-')
-    || str_starts_with($serverKey, 'Mid-server-');
 
+// Hapus deteksi otomatis berdasarkan awalan Mid- karena key Sandbox baru juga bisa berawalan Mid-
 $isProduction = filter_var(
-    env('MIDTRANS_IS_PRODUCTION', $environment === 'production' || $looksLikeProductionKey),
+    env('MIDTRANS_IS_PRODUCTION', $environment === 'production'),
     FILTER_VALIDATE_BOOLEAN
 );
 
@@ -20,4 +19,5 @@ return [
     'snap_url' => $isProduction
         ? 'https://app.midtrans.com/snap/snap.js'
         : 'https://app.sandbox.midtrans.com/snap/snap.js',
+    'order_prefix' => env('MIDTRANS_ORDER_PREFIX', env('APP_ENV') === 'production' ? '' : 'dev-'),
 ];

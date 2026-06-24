@@ -95,7 +95,7 @@ return new class extends Migration
             $table->decimal('diskon', 15, 2)->default(0);
             $table->decimal('ongkir', 15, 2)->default(0);
             $table->decimal('total', 15, 2)->default(0);
-            $table->enum('status', ['pending', 'diproses', 'dikirim', 'selesai', 'dibatalkan'])->default('pending');
+            $table->enum('status', ['belum_bayar', 'pending', 'diproses', 'dikirim', 'selesai', 'dibatalkan'])->default('belum_bayar');
             $table->text('catatan')->nullable();
             $table->string('nama_pelanggan')->nullable();
             $table->string('phone_pelanggan')->nullable();
@@ -118,10 +118,10 @@ return new class extends Migration
         Schema::create('pembayaran', function (Blueprint $table) {
             $table->id();
             $table->foreignId('transaksi_id')->constrained('transaksi')->onDelete('cascade');
-            $table->enum('metode', ['qris', 'e_wallet', 'm_banking', 'bayar_ditempat'])->default('bayar_ditempat');
+            $table->enum('metode', ['cash', 'qris', 'mandiri', 'bca', 'bri', 'bni', 'e_wallet', 'm_banking', 'midtrans'])->default('cash');
             $table->decimal('jumlah_bayar', 15, 2);
             $table->decimal('kembalian', 15, 2)->default(0);
-            $table->enum('status', ['pending', 'berhasil', 'gagal'])->default('pending');
+            $table->enum('status', ['belum_bayar', 'pending', 'berhasil', 'gagal'])->default('belum_bayar');
             $table->string('referensi')->nullable();
             $table->text('keterangan')->nullable();
             $table->timestamp('tanggal_bayar')->nullable();

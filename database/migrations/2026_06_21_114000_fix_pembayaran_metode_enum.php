@@ -11,7 +11,9 @@ return new class extends Migration
         DB::table('pembayaran')->where('metode', 'bayar_ditempat')->update(['metode' => 'cash']);
         
         // Sekarang ubah ENUM
-        DB::statement("ALTER TABLE `pembayaran` MODIFY COLUMN `metode` ENUM('cash', 'qris', 'mandiri', 'bca', 'bri', 'bni', 'e_wallet', 'm_banking') DEFAULT 'cash'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE `pembayaran` MODIFY COLUMN `metode` ENUM('cash', 'qris', 'mandiri', 'bca', 'bri', 'bni', 'e_wallet', 'm_banking') DEFAULT 'cash'");
+        }
     }
 
     public function down(): void
@@ -19,6 +21,8 @@ return new class extends Migration
         // Kembalikan data ke bayar_ditempat
         DB::table('pembayaran')->where('metode', 'cash')->update(['metode' => 'bayar_ditempat']);
         
-        DB::statement("ALTER TABLE `pembayaran` MODIFY COLUMN `metode` ENUM('qris', 'e_wallet', 'm_banking', 'bayar_ditempat') DEFAULT 'bayar_ditempat'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE `pembayaran` MODIFY COLUMN `metode` ENUM('qris', 'e_wallet', 'm_banking', 'bayar_ditempat') DEFAULT 'bayar_ditempat'");
+        }
     }
 };

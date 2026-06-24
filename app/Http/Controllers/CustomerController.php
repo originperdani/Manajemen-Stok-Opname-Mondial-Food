@@ -289,23 +289,23 @@ class CustomerController extends Controller
             // Konfigurasi Midtrans
             $this->ensureMidtransConfigured();
             Config::$serverKey = config('midtrans.server_key');
+            Config::$clientKey = config('midtrans.client_key');
             Config::$isProduction = (bool) config('midtrans.is_production');
             Config::$isSanitized = true;
             Config::$is3ds = true;
             
-            // Use kode_transaksi with retry suffix to avoid Midtrans duplicate order_id rejection
-            $orderId = $transaksi->kode_transaksi;
+            // Use kode_transaksi with environment prefix and retry suffix to avoid Midtrans duplicate order_id rejection
+            $orderId = config('midtrans.order_prefix') . $transaksi->kode_transaksi;
             $pembayaran = $transaksi->pembayaran;
             
-            // If there's an existing referensi with retry suffix, increment it
-            if ($pembayaran && $pembayaran->referensi && preg_match('/-R(\d+)$/', $pembayaran->referensi, $matches)) {
-                $retryCount = (int) $matches[1] + 1;
-                $orderId = $transaksi->kode_transaksi . '-R' . $retryCount;
-            } elseif ($pembayaran && $pembayaran->status !== 'berhasil') {
-                // First retry — check if original order_id was already used by trying with suffix
-                // This handles the case where the first checkout created an order in Midtrans
-                // but the customer didn't complete payment and is now retrying
-                $orderId = $transaksi->kode_transaksi . '-R1';
+            // If there's an existing referensi, increment its retry suffix
+            if ($pembayaran && $pembayaran->referensi) {
+                if (preg_match('/-R(\d+)$/', $pembayaran->referensi, $matches)) {
+                    $retryCount = (int) $matches[1] + 1;
+                    $orderId = config('midtrans.order_prefix') . $transaksi->kode_transaksi . '-R' . $retryCount;
+                } else {
+                    $orderId = config('midtrans.order_prefix') . $transaksi->kode_transaksi . '-R1';
+                }
             }
             
             // Prepare transaction details
@@ -423,8 +423,8 @@ class CustomerController extends Controller
             Config::$serverKey = config('midtrans.server_key');
             Config::$isProduction = (bool) config('midtrans.is_production');
             
-            // Use the stored referensi (which includes retry suffix) or fallback to kode_transaksi
-            $midtransOrderId = $transaksi->pembayaran->referensi ?? $transaksi->kode_transaksi;
+            // Use the stored referensi (which includes retry suffix) or fallback to kode_transaksi with prefix
+            $midtransOrderId = $transaksi->pembayaran->referensi ?? (config('midtrans.order_prefix') . $transaksi->kode_transaksi);
             
             // Get transaction status from Midtrans
             $status = \Midtrans\Transaction::status($midtransOrderId);
