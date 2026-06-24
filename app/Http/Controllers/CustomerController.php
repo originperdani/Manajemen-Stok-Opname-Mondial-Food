@@ -362,7 +362,7 @@ class CustomerController extends Controller
     
     public function getSnapToken(Transaksi $transaksi)
     {
-        if ($transaksi->user_id !== auth()->id()) {
+        if ((int) $transaksi->user_id !== (int) auth()->id()) {
             abort(403);
         }
 
@@ -403,7 +403,7 @@ class CustomerController extends Controller
 
     public function pesananDetail(Transaksi $transaksi)
     {
-        if ($transaksi->user_id !== auth()->id()) { abort(403); }
+        if ((int) $transaksi->user_id !== (int) auth()->id()) { abort(403); }
         
         // Check and update status from Midtrans if needed
         if ($transaksi->pembayaran && 
@@ -521,7 +521,7 @@ class CustomerController extends Controller
 
     private function renderStrukPesanan(Transaksi $transaksi, bool $download)
     {
-        if ($transaksi->user_id !== auth()->id()) { abort(403); }
+        if ((int) $transaksi->user_id !== (int) auth()->id()) { abort(403); }
 
         $transaksi->loadMissing('detail.produk', 'pembayaran', 'pengiriman', 'user');
 

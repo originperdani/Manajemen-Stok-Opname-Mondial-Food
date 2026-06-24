@@ -12,7 +12,14 @@ class Transaksi extends Model
         'ongkir', 'total', 'status', 'catatan', 'nama_pelanggan',
         'phone_pelanggan', 'email_pelanggan', 'alamat_pengiriman',
     ];
-    protected $casts = ['subtotal' => 'decimal:2', 'diskon' => 'decimal:2', 'ongkir' => 'decimal:2', 'total' => 'decimal:2'];
+    protected $casts = [
+        'user_id' => 'integer',
+        'kasir_id' => 'integer',
+        'subtotal' => 'decimal:2',
+        'diskon' => 'decimal:2',
+        'ongkir' => 'decimal:2',
+        'total' => 'decimal:2'
+    ];
 
     public function user() { return $this->belongsTo(User::class, 'user_id'); }
     public function kasir() { return $this->belongsTo(User::class, 'kasir_id'); }
