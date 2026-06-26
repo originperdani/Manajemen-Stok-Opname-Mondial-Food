@@ -1087,7 +1087,7 @@
             to {
                 opacity: 1;
                 filter: blur(0);
-                transform: translateY(0) scale(1);
+                transform: none;
             }
         }
 
