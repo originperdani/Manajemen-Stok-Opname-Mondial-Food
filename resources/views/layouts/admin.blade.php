@@ -799,13 +799,15 @@
         /* Tablet & mobile only: keep desktop layout untouched */
         @media (max-width: 1024px) {
             body {
-                overflow: hidden;
+                overflow: visible;
+                font-size: 0.85rem;
             }
 
             .admin-wrapper {
                 transform: none;
                 width: 100vw;
-                height: 100dvh;
+                height: auto;
+                min-height: 100vh;
             }
 
             .sidebar {
@@ -813,6 +815,7 @@
                 overflow-y: auto;
                 box-shadow: 10px 0 30px rgba(0,0,0,0.18);
                 transform: translateX(-100%);
+                z-index: 1001;
             }
 
             .sidebar.active {
@@ -822,50 +825,54 @@
             .main-content {
                 width: 100vw;
                 min-width: 0;
+                height: auto;
+                min-height: 100vh;
+                overflow: visible;
             }
 
             .topbar {
                 height: auto;
-                min-height: 64px;
-                padding: 0.75rem 1rem;
-                gap: 1rem;
+                min-height: 56px;
+                padding: 0.5rem 0.75rem;
+                gap: 0.5rem;
             }
 
             .topbar h2 {
                 min-width: 0;
-                font-size: clamp(1.05rem, 3.2vw, 1.35rem);
-                line-height: 1.25;
+                font-size: clamp(0.95rem, 3.2vw, 1.15rem);
+                line-height: 1.2;
                 overflow-wrap: anywhere;
             }
 
             .topbar-actions {
-                gap: 0.75rem;
+                gap: 0.5rem;
                 flex-shrink: 0;
             }
 
             .content-area {
-                padding: 1rem;
+                padding: 0.5rem;
                 overflow-x: hidden;
+                overflow-y: visible;
                 -webkit-overflow-scrolling: touch;
             }
 
             .card {
-                border-radius: 18px;
-                margin-bottom: 1.5rem;
+                border-radius: 12px;
+                margin-bottom: 1rem;
             }
 
             .card-header {
-                padding: 1rem 1.25rem;
-                gap: 0.75rem;
+                padding: 0.75rem 1rem;
+                gap: 0.5rem;
                 flex-wrap: wrap;
             }
 
             .card-header h3 {
-                font-size: 1.1rem;
+                font-size: 1rem;
             }
 
             .card-body {
-                padding: 1.25rem;
+                padding: 0.75rem 1rem;
             }
 
             .action-header,
@@ -874,8 +881,8 @@
             }
 
             .action-header {
-                padding: 1rem;
-                gap: 0.75rem;
+                padding: 0.75rem 0.5rem;
+                gap: 0.5rem;
             }
 
             .table-responsive,

@@ -868,11 +868,12 @@
 
         /* Tablet & mobile only: responsive safety layer */
         @media (max-width: 1024px) {
+            body { font-size: 0.9rem; }
             .container {
                 width: 100%;
                 max-width: 100% !important;
-                padding-left: 1.25rem !important;
-                padding-right: 1.25rem !important;
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
             }
 
             main,
@@ -882,6 +883,11 @@
             .card-body {
                 max-width: 100%;
             }
+            
+            .card { margin-bottom: 1rem !important; border-radius: 12px !important; }
+            .card-body { padding: 1rem !important; }
+            .card-header { padding: 1rem !important; }
+            .page-header { padding: 1.5rem 0 !important; }
 
             img,
             video,
