@@ -860,8 +860,9 @@
 
             /* Mobile sidebar even smaller */
             .mobile-sidebar { width: 50% !important; max-width: 220px !important; }
-            .mobile-sidebar-menu li a { font-size: 0.7rem; padding: 0.5rem 1rem; gap: 0.5rem; }
-            .mobile-sidebar-header { padding: 1rem; }
+            .mobile-sidebar-menu li { margin-bottom: 0.25rem; }
+            .mobile-sidebar-menu li a { font-size: 0.85rem; padding: 0.85rem 1.25rem; gap: 0.75rem; }
+            .mobile-sidebar-header { padding: 1.25rem 1rem; }
             .mobile-sidebar-header img { height: 35px; margin-bottom: 0.5rem; }
             .mobile-sidebar-header h3 { font-size: 0.85rem !important; margin-top: 0.5rem !important; }
         }
