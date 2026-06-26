@@ -1245,9 +1245,8 @@
         document.addEventListener('touchstart', event => {
             if (!isEditableTarget(event.target)) {
                 clearSelection();
-                event.preventDefault();
             }
-        }, { passive: false });
+        }, { passive: true });
 
         document.addEventListener('selectionchange', () => {
             const selection = window.getSelection ? window.getSelection() : null;
