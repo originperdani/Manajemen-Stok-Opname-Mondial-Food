@@ -859,7 +859,7 @@
             .header-right { gap: 0.25rem; }
 
             /* Mobile sidebar even smaller */
-            .mobile-sidebar { width: 60% !important; max-width: 220px !important; }
+            .mobile-sidebar { width: 50% !important; max-width: 220px !important; }
             .mobile-sidebar-menu li a { font-size: 0.7rem; padding: 0.5rem 1rem; gap: 0.5rem; }
             .mobile-sidebar-header { padding: 1rem; }
             .mobile-sidebar-header img { height: 35px; margin-bottom: 0.5rem; }
@@ -897,8 +897,8 @@
             }
 
             .mobile-sidebar {
-                width: min(78vw, 280px) !important;
-                max-width: 280px !important;
+                width: min(55vw, 220px) !important;
+                max-width: 220px !important;
             }
         }
 
@@ -984,8 +984,8 @@
             }
 
             .mobile-sidebar {
-                width: min(82vw, 280px) !important;
-                max-width: 280px !important;
+                width: min(60vw, 240px) !important;
+                max-width: 240px !important;
             }
 
             .container {
