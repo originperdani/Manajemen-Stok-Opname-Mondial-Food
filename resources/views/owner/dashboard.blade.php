@@ -14,13 +14,13 @@
 
 @section('content')
 <div class="stat-grid">
-    <a href="{{ route('owner.transaksi') }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
+    <a href="{{ route('owner.transaksi', ['periode' => 'harian', 'tanggal' => date('Y-m-d'), 'status' => 'selesai']) }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
         <div class="stat-info" style="flex: 1;">
             <h4>Pendapatan Hari Ini</h4>
             <p>Rp {{ number_format($pendapatanHariIni, 0, ',', '.') }}</p>
         </div>
     </a>
-    <a href="{{ route('owner.transaksi') }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
+    <a href="{{ route('owner.transaksi', ['periode' => 'harian', 'tanggal' => date('Y-m-d')]) }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
         <div class="stat-info" style="flex: 1;">
             <h4>Transaksi Hari Ini</h4>
             <p>{{ $transaksiHariIni }}</p>
@@ -160,13 +160,13 @@
 </div>
 
 <div class="stat-grid" style="margin-top: 2.5rem;">
-    <a href="{{ route('owner.transaksi') }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
+    <a href="{{ route('owner.transaksi', ['periode' => $filterType, 'tanggal' => $tanggal, 'bulan' => $bulan, 'tahun' => $tahun, 'status' => 'selesai']) }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
         <div class="stat-info" style="flex: 1;">
             <h4>Total Pendapatan <span style="font-size: 0.8rem; color: var(--text-light); display: block;">({{ $periodeLabel }})</span></h4>
             <p>Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</p>
         </div>
     </a>
-    <a href="{{ route('owner.transaksi') }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
+    <a href="{{ route('owner.transaksi', ['periode' => $filterType, 'tanggal' => $tanggal, 'bulan' => $bulan, 'tahun' => $tahun]) }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
         <div class="stat-info" style="flex: 1;">
             <h4>Total Transaksi <span style="font-size: 0.8rem; color: var(--text-light); display: block;">({{ $periodeLabel }})</span></h4>
             <p>{{ $totalTransaksi }}</p>

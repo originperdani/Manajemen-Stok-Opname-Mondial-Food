@@ -10,6 +10,7 @@ use App\Models\Pembayaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class OwnerController extends Controller
 {
@@ -148,15 +149,86 @@ class OwnerController extends Controller
 
     public function transaksi(Request $request)
     {
-        $query = Transaksi::with('user', 'pembayaran', 'detail');
-        if ($request->status) {
-            $query->where('status', $request->status);
+        $query = Transaksi::with('user', 'pembayaran', 'pengiriman', 'detail.produk');
+        
+        $periode = $request->get('periode') === 'tahunan' ? 'tahunan' : ($request->get('periode') === 'all' ? 'all' : ($request->get('periode') === 'harian' ? 'harian' : 'bulanan'));
+        $tahun = max(2024, (int) $request->get('tahun', now()->year));
+        $bulan = $request->get('bulan', now()->month);
+        $tanggal = $request->get('tanggal', now()->format('Y-m-d'));
+
+        if ($periode === 'tahunan') {
+            $start = \Carbon\Carbon::create($tahun, 1, 1)->startOfDay();
+            $end = \Carbon\Carbon::create($tahun, 12, 31)->endOfDay();
+        } elseif ($periode === 'all') {
+            $start = \Carbon\Carbon::create(2024, 1, 1)->startOfDay();
+            $end = \Carbon\Carbon::create(date('Y')+10, 12, 31)->endOfDay();
+        } elseif ($periode === 'harian') {
+            $start = \Carbon\Carbon::parse($tanggal)->startOfDay();
+            $end = \Carbon\Carbon::parse($tanggal)->endOfDay();
+        } else {
+            $bulan = min(max((int)$bulan, 1), 12);
+            $start = \Carbon\Carbon::create($tahun, $bulan, 1)->startOfDay();
+            $end = (clone $start)->endOfMonth();
         }
-        if ($request->tanggal) {
-            $query->whereDate('created_at', $request->tanggal);
+
+        if ($periode !== 'all') {
+            $query->whereBetween('created_at', [$start, $end]);
         }
+
+        $totalTransaksi = (clone $query)->count();
+        $transaksiSelesai = (clone $query)->where('status', 'selesai')->count();
+        $transaksiPending = (clone $query)->where('status', 'pending')->count();
+
+        if ($request->status) { $query->where('status', $request->status); }
+        if ($request->search) { $query->where('kode_transaksi', 'like', "%{$request->search}%"); }
+        
         $transaksi = $query->latest()->get();
-        return view('owner.transaksi', compact('transaksi'));
+        return view('owner.transaksi', compact('transaksi', 'periode', 'tahun', 'bulan', 'tanggal', 'totalTransaksi', 'transaksiSelesai', 'transaksiPending'));
+    }
+
+    public function detailTransaksi(Transaksi $transaksi)
+    {
+        $transaksi->load('user', 'pembayaran', 'pengiriman', 'detail.produk');
+        return view('owner.detail-transaksi', compact('transaksi'));
+    }
+
+    public function lihatStruk(Transaksi $transaksi)
+    {
+        return $this->renderStrukTransaksi($transaksi, false);
+    }
+
+    public function downloadStruk(Transaksi $transaksi)
+    {
+        return $this->renderStrukTransaksi($transaksi, true);
+    }
+
+    private function renderStrukTransaksi(Transaksi $transaksi, bool $download)
+    {
+        $transaksi->loadMissing('detail.produk', 'pembayaran', 'pengiriman', 'user');
+
+        abort_unless($transaksi->pembayaran, 404, 'Data pembayaran transaksi tidak ditemukan.');
+
+        $store = [
+            'name' => 'Mondial Bakery',
+            'address' => 'Jl. Mesjid Al-Akhyar No.34, Gandul, Kec. Cinere, Kota Depok, Jawa Barat 16512',
+            'phone' => '0857-9393-0723',
+            'email' => 'mondialfood.co@gmail.com',
+        ];
+
+        $filename = 'struk-' . $transaksi->kode_transaksi . '.pdf';
+        $pdf = Pdf::loadView('customer.struk-pesanan', [
+            'transaksi' => $transaksi,
+            'store' => $store,
+        ])->setPaper([0, 0, 226.77, 620], 'portrait');
+
+        $response = $download
+            ? $pdf->download($filename)
+            : $pdf->stream($filename);
+
+        return $response
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 
     public function laporan(Request $request)
@@ -198,11 +270,21 @@ class OwnerController extends Controller
         if ($request->search) {
             $query->where('nama_produk', 'like', "%{$request->search}%");
         }
-        if ($request->filter === 'menipis') {
+        if ($request->kategori_id) {
+            $query->where('kategori_id', $request->kategori_id);
+        }
+        if ($request->status) {
+            if ($request->status === 'menipis') {
+                $query->whereColumn('stok', '<=', 'stok_minimum');
+            } elseif ($request->status === 'aman') {
+                $query->whereColumn('stok', '>', 'stok_minimum');
+            }
+        } elseif ($request->filter === 'menipis') {
             $query->whereColumn('stok', '<=', 'stok_minimum');
         }
-        $produk = $query->get();
-        return view('owner.stok-produk', compact('produk'));
+        $produk = $query->paginate(10);
+        $kategori = \App\Models\KategoriProduk::all();
+        return view('owner.stok-produk', compact('produk', 'kategori'));
     }
 
     public function stokBahan(Request $request)
@@ -215,6 +297,8 @@ class OwnerController extends Controller
             $query->whereColumn('stok', '<=', 'stok_minimum');
         }
         $bahan = $query->get();
-        return view('owner.stok-bahan', compact('bahan'));
+        $totalBahan = BahanBaku::count();
+        $bahanMenipis = BahanBaku::whereColumn('stok', '<=', 'stok_minimum')->count();
+        return view('owner.stok-bahan', compact('bahan', 'totalBahan', 'bahanMenipis'));
     }
 }

@@ -156,6 +156,9 @@ Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->grou
     Route::put('/users/{user}', [OwnerController::class, 'updateUser'])->name('users.update');
     Route::delete('/users/{user}', [OwnerController::class, 'deleteUser'])->name('users.delete');
     Route::get('/transaksi', [OwnerController::class, 'transaksi'])->name('transaksi');
+    Route::get('/transaksi/{transaksi}', [OwnerController::class, 'detailTransaksi'])->name('transaksi.detail');
+    Route::get('/transaksi/{transaksi}/struk', [OwnerController::class, 'lihatStruk'])->name('transaksi.struk');
+    Route::get('/transaksi/{transaksi}/struk/download', [OwnerController::class, 'downloadStruk'])->name('transaksi.struk.download');
     Route::get('/laporan', [OwnerController::class, 'laporan'])->name('laporan');
     Route::get('/stok-produk', [OwnerController::class, 'stokProduk'])->name('stok-produk');
     Route::get('/stok-bahan', [OwnerController::class, 'stokBahan'])->name('stok-bahan');
