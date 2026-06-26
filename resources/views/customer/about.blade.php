@@ -465,7 +465,7 @@
     <div class="about-container">
         <div class="about-content">
             <div class="about-image reveal fade-left">
-                <img src="{{ asset('images/logo.png') }}" alt="Mondial Bakery">
+                <img src="{{ asset('images/Logo.png') }}" alt="Mondial Bakery">
             </div>
             <div class="about-text reveal fade-right">
                 <h2 class="reveal fade-bottom">Cerita di Balik Setiap Gigitan</h2>
@@ -477,14 +477,14 @@
         <div class="vision-mission">
             <div class="vm-card reveal fade-bottom delay-100">
                 <div class="vm-icon">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo" style="width: 45px; height: 45px; object-fit: contain; mix-blend-mode: multiply;">
+                    <img src="{{ asset('images/Logo.png') }}" alt="Logo" style="width: 45px; height: 45px; object-fit: contain; mix-blend-mode: multiply;">
                 </div>
                 <h3>Visi Kami</h3>
                 <p>Menjadi toko roti dan kue pilihan utama keluarga Indonesia yang dikenal karena kualitas, kebersihan, dan keaslian rasa yang konsisten serta pelayanan yang hangat dari hati.</p>
             </div>
             <div class="vm-card reveal fade-bottom delay-200">
                 <div class="vm-icon">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo" style="width: 45px; height: 45px; object-fit: contain; mix-blend-mode: multiply;">
+                    <img src="{{ asset('images/Logo.png') }}" alt="Logo" style="width: 45px; height: 45px; object-fit: contain; mix-blend-mode: multiply;">
                 </div>
                 <h3>Misi Kami</h3>
                 <p>Memberikan produk roti dan kue terbaik dengan bahan berkualitas premium, pelayanan yang ramah dan hangat, serta terus berinovasi mengikuti selera pelanggan tanpa meninggalkan akar tradisi dan keaslian rasa.</p>
