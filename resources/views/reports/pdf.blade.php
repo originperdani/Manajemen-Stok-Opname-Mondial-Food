@@ -159,7 +159,7 @@
         <table class="summary">
             <tr>
                 <td>
-                    <span class="summary-label">Total Jenis Bahan Baku</span>
+                    <span class="summary-label">Total Bahan Baku</span>
                     <span class="summary-value">{{ number_format($report['total_bahan_baku'], 0, ',', '.') }}</span>
                 </td>
                 <td>
@@ -171,7 +171,7 @@
                     <span class="summary-value">{{ number_format($report['total_masuk'], 0, ',', '.') }}</span>
                 </td>
                 <td>
-                    <span class="summary-label">Bahan Stok Menipis</span>
+                    <span class="summary-label">Bahan Baku Stok Menipis</span>
                     <span class="summary-value">{{ number_format($report['stok_menipis'], 0, ',', '.') }}</span>
                 </td>
                 <td>
@@ -188,16 +188,12 @@
                     <span class="summary-value">{{ number_format($report['total_produksi'], 0, ',', '.') }}</span>
                 </td>
                 <td>
-                    <span class="summary-label">Total Bahan Jadi</span>
+                    <span class="summary-label">Total Produksi</span>
                     <span class="summary-value">{{ number_format($report['total_jadi'], 0, ',', '.') }}</span>
                 </td>
                 <td>
                     <span class="summary-label">Produk Diproduksi</span>
                     <span class="summary-value">{{ number_format($report['produk_diproduksi'], 0, ',', '.') }}</span>
-                </td>
-                <td>
-                    <span class="summary-label">Produksi Selesai</span>
-                    <span class="summary-value">{{ number_format($report['produksi_selesai'], 0, ',', '.') }}</span>
                 </td>
             </tr>
         </table>
@@ -215,10 +211,6 @@
                 <td>
                     <span class="summary-label">Total Pendapatan</span>
                     <span class="summary-value">Rp {{ number_format($report['total_pendapatan'], 0, ',', '.') }}</span>
-                </td>
-                <td>
-                    <span class="summary-label">Rata-rata Transaksi</span>
-                    <span class="summary-value">Rp {{ number_format($report['avg_transaksi'], 0, ',', '.') }}</span>
                 </td>
             </tr>
         </table>
@@ -314,6 +306,12 @@
                                     <tr style="background: #fef3c7; font-weight: bold;">
                                         <td style="border-top: 2px solid #d97706;">Keseluruhan Produk Terjual</td>
                                         <td style="border-top: 2px solid #d97706;">{{ number_format($totalProdukTerjual, 0, ',', '.') }}</td>
+                                    </tr>
+                                @endif
+                                @if($report['module'] === 'penjualan' && strtoupper($section['title']) === 'DETAIL TRANSAKSI')
+                                    <tr style="background: #fef3c7; font-weight: bold;">
+                                        <td colspan="7" style="border-top: 2px solid #d97706; text-align: right;">Total Pendapatan (Transaksi Selesai)</td>
+                                        <td style="border-top: 2px solid #d97706;">Rp {{ number_format($report['total_pendapatan'] ?? 0, 0, ',', '.') }}</td>
                                     </tr>
                                 @endif
                             </tbody>

@@ -13,8 +13,40 @@
 @endsection
 
 @section('content')
+<div class="stat-grid mb-4" style="margin-bottom: 1.5rem;">
+    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+        <div class="stat-info">
+            <h4 style="color: var(--primary-dark);">Total Produk</h4>
+            <p>{{ \App\Models\Produk::count() }}</p>
+        </div>
+    </div>
+    <a href="{{ route('produksi.produk', ['status' => 'menipis']) }}" class="stat-card" style="border-left: 5px solid #dc3545; text-decoration: none; color: inherit; display: flex; cursor: pointer;">
+        <div class="stat-info" style="flex: 1;">
+            <h4 style="color: #dc3545;">Stok Produk Menipis</h4>
+            <p style="color: #dc3545;">{{ \App\Models\Produk::whereColumn('stok', '<=', 'stok_minimum')->count() }}</p>
+        </div>
+    </a>
+</div>
+
 <div class="action-header" style="border-left: 5px solid var(--primary);">
-    <form method="GET" class="d-flex gap-1" style="flex: 1;"><input type="text" name="search" class="form-control" placeholder="Cari produk..." value="{{ request('search') }}" style="width:250px"><button class="btn btn-primary"><i class="fas fa-search"></i> Cari</button></form>
+    <form method="GET" class="d-flex gap-2 align-items-center" style="flex: 1;">
+        <input type="text" name="search" class="form-control" placeholder="Cari produk..." value="{{ request('search') }}" style="width:250px">
+        <select name="kategori_id" class="form-control" style="width:200px" onchange="this.form.submit()">
+            <option value="">Semua Kategori</option>
+            @foreach($kategori as $k)
+                <option value="{{ $k->id }}" {{ request('kategori_id') == $k->id ? 'selected' : '' }}>{{ $k->nama_kategori }}</option>
+            @endforeach
+        </select>
+        <select name="status" class="form-control" style="width:200px" onchange="this.form.submit()">
+            <option value="">Semua Status Stok</option>
+            <option value="aman" {{ request('status') == 'aman' ? 'selected' : '' }}>Stok Aman</option>
+            <option value="menipis" {{ request('status') == 'menipis' ? 'selected' : '' }}>Stok Menipis / Habis</option>
+        </select>
+        <button class="btn btn-primary"><i class="fas fa-search"></i> Cari</button>
+        @if(request('search') || request('status') || request('kategori_id'))
+            <a href="{{ route('produksi.produk') }}" class="btn btn-danger"><i class="fas fa-undo"></i> Reset</a>
+        @endif
+    </form>
     <a href="{{ route('produksi.produk.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Tambah Produk</a>
 </div>
 

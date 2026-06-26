@@ -604,12 +604,13 @@
         }
 
         .card-header {
-            padding: 1.5rem 2.5rem;
+            padding: 1.5rem;
             border-bottom: 1px solid var(--border);
+            background: #fafafa;
+            border-radius: calc(var(--radius-lg) - 1px) calc(var(--radius-lg) - 1px) 0 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #fff;
         }
 
         .card-header h3 { font-size: 1.4rem; font-weight: 800; font-family: 'Raleway', sans-serif; }

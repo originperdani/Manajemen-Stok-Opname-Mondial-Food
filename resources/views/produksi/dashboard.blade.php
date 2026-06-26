@@ -14,24 +14,36 @@
 
 @section('content')
 <div class="stat-grid">
-    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+    <a href="{{ route('produksi.produk') }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
         <div class="stat-info" style="flex: 1;">
             <h4>Total Produk</h4>
             <p>{{ $totalProduk }}</p>
         </div>
-    </div>
-    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+    </a>
+    <a href="{{ route('produksi.resep') }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
         <div class="stat-info" style="flex: 1;">
             <h4>Total Resep</h4>
             <p>{{ $totalResep }}</p>
         </div>
-    </div>
-    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+    </a>
+    <a href="{{ route('produksi.riwayat', ['periode' => 'harian', 'tanggal' => date('Y-m-d')]) }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
         <div class="stat-info" style="flex: 1;">
-            <h4>Produksi Hari Ini</h4>
+            <h4>Aktivitas Produksi Hari Ini</h4>
             <p>{{ $produksiHariIni }}</p>
         </div>
-    </div>
+    </a>
+    <a href="{{ route('produksi.riwayat', ['periode' => 'harian', 'tanggal' => date('Y-m-d')]) }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
+        <div class="stat-info" style="flex: 1;">
+            <h4>Produk Diproduksi Hari Ini</h4>
+            <p>{{ $produkDiproduksiHariIni }}</p>
+        </div>
+    </a>
+    <a href="{{ route('produksi.produk', ['status' => 'menipis']) }}" class="stat-card" style="border-left: 5px solid #dc3545; text-decoration: none; color: inherit; display: flex; cursor: pointer;">
+        <div class="stat-info" style="flex: 1;">
+            <h4 style="color: #dc3545;">Stok Produk Menipis</h4>
+            <p style="color: #dc3545;">{{ $produkMenipis->count() }}</p>
+        </div>
+    </a>
 </div>
 
 @if($produkMenipis->count() > 0)

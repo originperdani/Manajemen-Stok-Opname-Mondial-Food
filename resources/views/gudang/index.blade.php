@@ -11,6 +11,21 @@
 @endsection
 
 @section('content')
+<div class="stats-grid mb-4" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+    <a href="{{ route('gudang.index') }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer; background: #fff; padding: 1.5rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); align-items: center;">
+        <div class="stat-info" style="flex: 1;">
+            <h4 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">Total Bahan Baku</h4>
+            <p style="font-size: 1.8rem; font-weight: 700; color: var(--text-dark); margin: 0;">{{ $totalBahan }}</p>
+        </div>
+    </a>
+    <a href="{{ route('gudang.index', ['filter' => 'menipis']) }}" class="stat-card" style="border-left: 5px solid #dc3545; text-decoration: none; color: inherit; display: flex; cursor: pointer; background: #fff; padding: 1.5rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); align-items: center;">
+        <div class="stat-info" style="flex: 1;">
+            <h4 style="color: #dc3545; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">Bahan Baku Stok Menipis</h4>
+            <p style="font-size: 1.8rem; font-weight: 700; color: #dc3545; margin: 0;">{{ $bahanMenipis }}</p>
+        </div>
+    </a>
+</div>
+
 <div class="action-header" style="border-left: 5px solid var(--primary);">
     <form method="GET" class="d-flex gap-1" style="flex: 1; flex-wrap: wrap;">
         <input type="text" name="search" class="form-control" placeholder="Cari bahan..." value="{{ request('search') }}" style="width:250px">

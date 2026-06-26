@@ -30,12 +30,12 @@
     .kategori-table-wrap th:last-child,
     .kategori-table-wrap td:last-child {
         width: 1%;
-        text-align: right;
+        text-align: center;
     }
 
     .kategori-table-wrap form {
-        display: inline-flex;
-        justify-content: flex-end;
+        display: flex;
+        justify-content: center;
         margin: 0;
     }
 
@@ -59,6 +59,17 @@
 
 @section('content')
 <div style="padding-top: 1rem;">
+<div class="stat-grid mb-4" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+    @foreach($kategori as $kat)
+    <a href="{{ route('produksi.produk', ['kategori_id' => $kat->id]) }}" class="stat-card" style="background: #fff; padding: 1.25rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 5px solid var(--primary); display: flex; text-decoration: none; color: inherit; transition: transform 0.2s;">
+        <div class="stat-info" style="flex: 1;">
+            <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-light); margin-bottom: 0.5rem; font-weight: 600;">{{ $kat->nama_kategori }}</h4>
+            <p style="font-size: 1.5rem; font-weight: 700; color: var(--text-dark); margin: 0;">{{ $kat->produk_count }} <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-light);">Produk</span></p>
+        </div>
+    </a>
+    @endforeach
+</div>
+
 <div class="kategori-grid">
     <div class="card" style="border-left: 5px solid var(--primary);">
         <div class="card-header"><h3>Tambah Kategori</h3></div>

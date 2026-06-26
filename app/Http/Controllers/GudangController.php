@@ -19,14 +19,30 @@ class GudangController extends Controller
     public function riwayat(Request $request)
     {
         $sort = $request->get('sort', 'terbaru');
-        $tanggal = $request->get('tanggal');
+        
+        $periode = $request->get('periode') === 'tahunan' ? 'tahunan' : ($request->get('periode') === 'all' ? 'all' : ($request->get('periode') === 'harian' ? 'harian' : 'bulanan'));
+        $tahun = max(2024, (int) $request->get('tahun', now()->year));
+        $bulan = $request->get('bulan', now()->month);
+        $tanggal = $request->get('tanggal', now()->format('Y-m-d'));
+
+        if ($periode === 'tahunan') {
+            $start = \Carbon\Carbon::create($tahun, 1, 1)->startOfDay();
+            $end = \Carbon\Carbon::create($tahun, 12, 31)->endOfDay();
+        } elseif ($periode === 'all') {
+            $start = \Carbon\Carbon::create($tahun, 1, 1)->startOfDay();
+            $end = \Carbon\Carbon::create($tahun, 12, 31)->endOfDay();
+        } elseif ($periode === 'harian') {
+            $start = \Carbon\Carbon::parse($tanggal)->startOfDay();
+            $end = \Carbon\Carbon::parse($tanggal)->endOfDay();
+        } else {
+            $bulan = min(max((int)$bulan, 1), 12);
+            $start = \Carbon\Carbon::create($tahun, $bulan, 1)->startOfDay();
+            $end = (clone $start)->endOfMonth();
+        }
         
         $query = StokLog::where('tipe', 'bahan_baku')->with(['user', 'bahanBaku']);
         
-        // Filter by single date
-        if ($tanggal) {
-            $query->whereDate('created_at', '=', $tanggal);
-        }
+        $query->whereBetween('created_at', [$start, $end]);
         
         if ($sort === 'terlama') {
             $query->oldest();
@@ -38,7 +54,7 @@ class GudangController extends Controller
         $logsMasuk = $logs->where('jenis', 'masuk');
         $logsKeluar = $logs->where('jenis', 'keluar');
         
-        return view('gudang.riwayat', compact('logs', 'logsMasuk', 'logsKeluar', 'sort', 'tanggal'));
+        return view('gudang.riwayat', compact('logs', 'logsMasuk', 'logsKeluar', 'sort', 'periode', 'tahun', 'bulan', 'tanggal'));
     }
 
     public function index(Request $request)
@@ -51,7 +67,9 @@ class GudangController extends Controller
             $query->whereColumn('stok', '<=', 'stok_minimum');
         }
         $bahan = $query->latest()->get();
-        return view('gudang.index', compact('bahan'));
+        $totalBahan = BahanBaku::count();
+        $bahanMenipis = BahanBaku::whereColumn('stok', '<=', 'stok_minimum')->count();
+        return view('gudang.index', compact('bahan', 'totalBahan', 'bahanMenipis'));
     }
 
     public function create()

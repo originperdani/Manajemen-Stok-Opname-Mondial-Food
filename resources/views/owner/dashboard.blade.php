@@ -14,42 +14,42 @@
 
 @section('content')
 <div class="stat-grid">
-    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+    <a href="{{ route('owner.transaksi') }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
         <div class="stat-info" style="flex: 1;">
             <h4>Pendapatan Hari Ini</h4>
             <p>Rp {{ number_format($pendapatanHariIni, 0, ',', '.') }}</p>
         </div>
-    </div>
-    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+    </a>
+    <a href="{{ route('owner.transaksi') }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
         <div class="stat-info" style="flex: 1;">
             <h4>Transaksi Hari Ini</h4>
             <p>{{ $transaksiHariIni }}</p>
         </div>
-    </div>
-    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+    </a>
+    <a href="{{ route('owner.stok-produk') }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
         <div class="stat-info" style="flex: 1;">
             <h4>Total Produk</h4>
             <p>{{ $totalProduk }}</p>
         </div>
-    </div>
-    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+    </a>
+    <a href="{{ route('owner.users') }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
         <div class="stat-info" style="flex: 1;">
             <h4>Total User</h4>
             <p>{{ $totalUser }}</p>
         </div>
-    </div>
-    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+    </a>
+    <a href="{{ route('owner.stok-produk', ['filter' => 'menipis']) }}" class="stat-card" style="border-left: 5px solid #dc3545; text-decoration: none; color: inherit; display: flex; cursor: pointer;">
         <div class="stat-info" style="flex: 1;">
-            <h4>Produk Stok Menipis</h4>
-            <p>{{ $produkStokMenipis }}</p>
+            <h4 style="color: #dc3545;">Produk Stok Menipis</h4>
+            <p style="color: #dc3545;">{{ $produkStokMenipis }}</p>
         </div>
-    </div>
-    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+    </a>
+    <a href="{{ route('owner.stok-bahan', ['filter' => 'menipis']) }}" class="stat-card" style="border-left: 5px solid #dc3545; text-decoration: none; color: inherit; display: flex; cursor: pointer;">
         <div class="stat-info" style="flex: 1;">
-            <h4>Bahan Stok Menipis</h4>
-            <p>{{ $bahanStokMenipis }}</p>
+            <h4 style="color: #dc3545;">Bahan Baku Stok Menipis</h4>
+            <p style="color: #dc3545;">{{ $bahanStokMenipis }}</p>
         </div>
-    </div>
+    </a>
 </div>
 
 <div class="grid-2">
@@ -160,18 +160,18 @@
 </div>
 
 <div class="stat-grid" style="margin-top: 2.5rem;">
-    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+    <a href="{{ route('owner.transaksi') }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
         <div class="stat-info" style="flex: 1;">
             <h4>Total Pendapatan <span style="font-size: 0.8rem; color: var(--text-light); display: block;">({{ $periodeLabel }})</span></h4>
             <p>Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</p>
         </div>
-    </div>
-    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+    </a>
+    <a href="{{ route('owner.transaksi') }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
         <div class="stat-info" style="flex: 1;">
             <h4>Total Transaksi <span style="font-size: 0.8rem; color: var(--text-light); display: block;">({{ $periodeLabel }})</span></h4>
             <p>{{ $totalTransaksi }}</p>
         </div>
-    </div>
+    </a>
 </div>
 @endsection
 

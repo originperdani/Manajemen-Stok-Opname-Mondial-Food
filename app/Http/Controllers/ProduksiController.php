@@ -22,9 +22,10 @@ class ProduksiController extends Controller
         $totalProduk = Produk::count();
         $totalResep = Resep::count();
         $produksiHariIni = Produksi::whereDate('tanggal_produksi', today())->count();
+        $produkDiproduksiHariIni = Produksi::whereDate('tanggal_produksi', today())->distinct()->count('produk_id');
         $produkMenipis = Produk::whereColumn('stok', '<=', 'stok_minimum')->get();
         $produksiTerbaru = Produksi::with('produk', 'user')->latest()->take(5)->get();
-        return view('produksi.dashboard', compact('totalProduk', 'totalResep', 'produksiHariIni', 'produkMenipis', 'produksiTerbaru'));
+        return view('produksi.dashboard', compact('totalProduk', 'totalResep', 'produksiHariIni', 'produkDiproduksiHariIni', 'produkMenipis', 'produksiTerbaru'));
     }
 
     // PRODUK
@@ -32,6 +33,16 @@ class ProduksiController extends Controller
     {
         $query = Produk::with('kategori');
         if ($request->search) { $query->where('nama_produk', 'like', "%{$request->search}%"); }
+        if ($request->status) {
+            if ($request->status == 'menipis') {
+                $query->whereColumn('stok', '<=', 'stok_minimum');
+            } elseif ($request->status == 'aman') {
+                $query->whereColumn('stok', '>', 'stok_minimum');
+            }
+        }
+        if ($request->kategori_id) {
+            $query->where('kategori_id', $request->kategori_id);
+        }
         $produk = $query->latest()->paginate(15);
         $kategori = KategoriProduk::all();
         return view('produksi.produk', compact('produk', 'kategori'));
@@ -146,9 +157,13 @@ class ProduksiController extends Controller
     }
 
     // RESEP
-    public function resep()
+    public function resep(Request $request)
     {
-        $resep = Resep::with('produk', 'kategori', 'detail.bahanBaku')->latest()->paginate(15);
+        $query = Resep::with('produk', 'kategori', 'detail.bahanBaku')->latest();
+        if ($request->filter) {
+            $query->where('id', $request->filter);
+        }
+        $resep = $query->paginate(15);
         return view('produksi.resep', compact('resep'));
     }
 
@@ -224,10 +239,36 @@ class ProduksiController extends Controller
         return view('produksi.input-produksi', compact('resep'));
     }
 
-    public function riwayatProduksi()
+    public function riwayatProduksi(Request $request)
     {
-        $produksi = Produksi::with('produk', 'user')->latest()->paginate(15);
-        return view('produksi.riwayat', compact('produksi'));
+        $periode = $request->get('periode', 'bulanan');
+        $tahun = $request->get('tahun', date('Y'));
+        $bulan = $request->get('bulan', date('n'));
+        $tanggal = $request->get('tanggal', date('Y-m-d'));
+
+        if ($periode === 'tahunan') {
+            $start = \Carbon\Carbon::create($tahun, 1, 1)->startOfDay();
+            $end = \Carbon\Carbon::create($tahun, 12, 31)->endOfDay();
+        } elseif ($periode === 'all') {
+            $start = \Carbon\Carbon::create($tahun, 1, 1)->startOfDay();
+            $end = \Carbon\Carbon::create($tahun, 12, 31)->endOfDay();
+        } elseif ($periode === 'harian') {
+            $start = \Carbon\Carbon::parse($tanggal)->startOfDay();
+            $end = \Carbon\Carbon::parse($tanggal)->endOfDay();
+        } else {
+            $bulan = min(max((int)$bulan, 1), 12);
+            $start = \Carbon\Carbon::create($tahun, $bulan, 1)->startOfDay();
+            $end = (clone $start)->endOfMonth();
+        }
+        
+        $query = Produksi::with('produk', 'user');
+        $query->whereBetween('tanggal_produksi', [$start, $end]);
+        $totalProduksi = (clone $query)->sum('jumlah_produksi');
+        $totalJenisProduk = (clone $query)->distinct()->count('produk_id');
+        $totalAktivitas = (clone $query)->count();
+        $produksi = $query->latest('tanggal_produksi')->latest('id')->paginate(15);
+        
+        return view('produksi.riwayat', compact('produksi', 'totalProduksi', 'totalJenisProduk', 'totalAktivitas', 'periode', 'tahun', 'bulan', 'tanggal'));
     }
 
     public function prosesProduksi(Request $request)

@@ -117,10 +117,40 @@ class PenjualanController extends Controller
     public function transaksi(Request $request)
     {
         $query = Transaksi::with('user', 'pembayaran', 'pengiriman', 'detail.produk');
+        
+        $periode = $request->get('periode') === 'tahunan' ? 'tahunan' : ($request->get('periode') === 'all' ? 'all' : ($request->get('periode') === 'harian' ? 'harian' : 'bulanan'));
+        $tahun = max(2024, (int) $request->get('tahun', now()->year));
+        $bulan = $request->get('bulan', now()->month);
+        $tanggal = $request->get('tanggal', now()->format('Y-m-d'));
+
+        if ($periode === 'tahunan') {
+            $start = \Carbon\Carbon::create($tahun, 1, 1)->startOfDay();
+            $end = \Carbon\Carbon::create($tahun, 12, 31)->endOfDay();
+        } elseif ($periode === 'all') {
+            $start = \Carbon\Carbon::create(2024, 1, 1)->startOfDay();
+            $end = \Carbon\Carbon::create(date('Y')+10, 12, 31)->endOfDay();
+        } elseif ($periode === 'harian') {
+            $start = \Carbon\Carbon::parse($tanggal)->startOfDay();
+            $end = \Carbon\Carbon::parse($tanggal)->endOfDay();
+        } else {
+            $bulan = min(max((int)$bulan, 1), 12);
+            $start = \Carbon\Carbon::create($tahun, $bulan, 1)->startOfDay();
+            $end = (clone $start)->endOfMonth();
+        }
+
+        if ($periode !== 'all') {
+            $query->whereBetween('created_at', [$start, $end]);
+        }
+
+        $totalTransaksi = (clone $query)->count();
+        $transaksiSelesai = (clone $query)->where('status', 'selesai')->count();
+        $transaksiPending = (clone $query)->where('status', 'pending')->count();
+
         if ($request->status) { $query->where('status', $request->status); }
         if ($request->search) { $query->where('kode_transaksi', 'like', "%{$request->search}%"); }
+        
         $transaksi = $query->latest()->get();
-        return view('penjualan.transaksi', compact('transaksi'));
+        return view('penjualan.transaksi', compact('transaksi', 'periode', 'tahun', 'bulan', 'tanggal', 'totalTransaksi', 'transaksiSelesai', 'transaksiPending'));
     }
 
     public function detailTransaksi(Transaksi $transaksi)

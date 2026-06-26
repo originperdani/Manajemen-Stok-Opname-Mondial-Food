@@ -256,9 +256,35 @@
 @endsection
 
 @section('content')
-<div class="action-header" style="border-left: 5px solid var(--primary);">
-    <div style="flex: 1"></div>
-    <a href="{{ route('produksi.resep.create') }}" class="btn btn-primary">Tambah Resep</a>
+<div class="action-header" style="border-left: 5px solid var(--primary); display: flex; align-items: center; justify-content: space-between;">
+    <div class="d-flex align-items-center">
+        <div style="padding-left: 0.5rem;">
+            <h4 style="color: var(--primary-dark); font-size: 0.9rem; margin-bottom: 0; font-weight: 700; text-transform: uppercase;">Total Resep</h4>
+            <p style="font-size: 1.5rem; font-weight: 800; margin: 0; color: var(--text-dark);">{{ \App\Models\Resep::count() }}</p>
+        </div>
+    </div>
+    <a href="{{ route('produksi.resep.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Tambah Resep</a>
+</div>
+
+<div class="card mb-4" style="border-radius: 16px; border: 1px solid var(--border); border-left: 5px solid var(--primary);">
+    <div class="card-header" style="background: linear-gradient(135deg, #fffaf5 0%, #fff4e7 100%);">
+        <h3 style="font-size: 1.1rem; color: var(--text-dark); margin:0;">Filter Data Resep:</h3>
+    </div>
+    <div class="card-body">
+        <div class="d-flex gap-2 align-items-center">
+            <select class="form-control" style="max-width: 300px; border-radius: 8px;" onchange="if(this.value){window.location.href='?filter='+this.value;}else{window.location.href='?';}">
+                <option value="">-- Semua Resep --</option>
+                @foreach(\App\Models\Resep::orderBy('nama_resep')->get() as $rs)
+                    <option value="{{ $rs->id }}" {{ request('filter') == $rs->id ? 'selected' : '' }}>
+                        {{ $rs->nama_resep }}
+                    </option>
+                @endforeach
+            </select>
+            @if(request('filter'))
+                <a href="{{ route('produksi.resep') }}" class="btn btn-danger" style="border-radius: 8px;"><i class="fas fa-undo"></i> Reset</a>
+            @endif
+        </div>
+    </div>
 </div>
 
 @forelse($resep as $r)

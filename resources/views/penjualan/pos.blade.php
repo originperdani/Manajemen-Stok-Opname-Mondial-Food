@@ -12,7 +12,8 @@
 @section('styles')
 <style>
     /* ═══ LAYOUT ═══ */
-    .pos-container{display:grid;grid-template-columns:1fr 420px;gap:1.25rem;height:calc(100vh - 220px);min-height:600px;max-height:calc(100vh - 220px)}
+    .content-area { display: flex; flex-direction: column; }
+    .pos-container{display:grid;grid-template-columns:1fr 420px;gap:1.25rem;flex:1;min-height:0;}
 
     /* ═══ PRODUCT GRID ═══ */
     .pos-products{overflow-y:auto;padding-right:0.5rem;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
@@ -32,7 +33,7 @@
     .pos-item .stock{font-size:0.65rem;color:var(--text-light);margin-top:0.1rem}
 
     /* ═══ CART PANEL ═══ */
-    .pos-cart{background:white;border-radius:16px;border:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);min-height:600px}
+    .pos-cart{background:white;border-radius:16px;border:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);}
     .pos-cart-header{padding:0.85rem 1.25rem;background:linear-gradient(135deg,var(--primary),#8B6914);border-bottom:none;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
     .pos-cart-header h3{font-size:0.95rem;color:white;margin:0;display:flex;align-items:center;gap:0.5rem}
     .pos-cart-header .cart-count{background:rgba(255,255,255,0.25);color:white;font-size:0.7rem;font-weight:700;padding:0.15rem 0.55rem;border-radius:99px;min-width:20px;text-align:center}

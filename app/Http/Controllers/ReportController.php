@@ -169,6 +169,7 @@ class ReportController extends Controller
                 'name' => $item->nama_bahan,
                 'stok' => $this->formatDecimal($stokAkhir) . ' ' . $item->satuan,
                 'stok_min' => $this->formatDecimal($item->stok_minimum) . ' ' . $item->satuan,
+                'harga_satuan' => 'Rp ' . number_format($item->harga_per_satuan, 0, ',', '.'),
                 'nilai_stok_formatted' => 'Rp ' . number_format($nilaiStok, 0, ',', '.'),
                 'nilai_stok_raw' => $nilaiStok,
             ];
@@ -227,6 +228,7 @@ class ReportController extends Controller
                 $item['name'],
                 $item['stok'],
                 $item['stok_min'],
+                $item['harga_satuan'],
                 $item['nilai_stok_formatted'],
             ];
         }, $ringkasanBahan);
@@ -236,6 +238,7 @@ class ReportController extends Controller
                 $item['name'],
                 $item['stok'],
                 $item['stok_min'],
+                $item['harga_satuan'],
                 $item['nilai_stok_raw'],
             ];
         }, $ringkasanBahan);
@@ -256,20 +259,35 @@ class ReportController extends Controller
             'stok_menipis' => BahanBaku::whereColumn('stok', '<=', 'stok_minimum')->count(),
             'total_nilai_persediaan' => $totalNilaiPersediaan,
             'summary' => [
-                ['label' => 'Total Jenis Bahan Baku', 'value' => number_format($totalBahanBaku, 0, ',', '.')],
-                ['label' => 'Total Aktivitas Stok', 'value' => number_format($logs->count(), 0, ',', '.')],
-                ['label' => 'Total Bahan Masuk', 'value' => $this->formatDecimal($logs->where('jenis', 'masuk')->sum('jumlah'))],
-                ['label' => 'Total Bahan Keluar', 'value' => $this->formatDecimal($logs->where('jenis', 'keluar')->sum('jumlah'))],
-                ['label' => 'Bahan Stok Menipis', 'value' => number_format(BahanBaku::whereColumn('stok', '<=', 'stok_minimum')->count(), 0, ',', '.')],
-                ['label' => 'Nilai Persediaan Akhir Periode', 'value' => 'Rp ' . number_format((float) $totalNilaiPersediaan, 0, ',', '.')],
+                ['label' => 'Total Bahan Baku', 'value' => number_format($totalBahanBaku, 0, ',', '.'), 'link' => route(auth()->user()->role === 'owner' ? 'owner.stok-bahan' : 'gudang.index')],
+                ['label' => 'Total Aktivitas Stok', 'value' => number_format($logs->count(), 0, ',', '.'), 'link' => route(auth()->user()->role === 'owner' ? 'owner.stok-bahan' : 'gudang.riwayat', array_filter([
+                    'periode' => $period['type'],
+                    'tahun' => $period['year'],
+                    'bulan' => $period['type'] === 'bulanan' ? $period['month'] : null,
+                    'tanggal' => $period['type'] === 'harian' ? $period['date'] : null,
+                ]))],
+                ['label' => 'Total Bahan Masuk', 'value' => $this->formatDecimal($logs->where('jenis', 'masuk')->sum('jumlah')), 'link' => route(auth()->user()->role === 'owner' ? 'owner.stok-bahan' : 'gudang.riwayat', array_filter([
+                    'periode' => $period['type'],
+                    'tahun' => $period['year'],
+                    'bulan' => $period['type'] === 'bulanan' ? $period['month'] : null,
+                    'tanggal' => $period['type'] === 'harian' ? $period['date'] : null,
+                ])) . '#stok-masuk'],
+                ['label' => 'Total Bahan Keluar', 'value' => $this->formatDecimal($logs->where('jenis', 'keluar')->sum('jumlah')), 'link' => route(auth()->user()->role === 'owner' ? 'owner.stok-bahan' : 'gudang.riwayat', array_filter([
+                    'periode' => $period['type'],
+                    'tahun' => $period['year'],
+                    'bulan' => $period['type'] === 'bulanan' ? $period['month'] : null,
+                    'tanggal' => $period['type'] === 'harian' ? $period['date'] : null,
+                ])) . '#stok-keluar'],
+                ['label' => 'Bahan Baku Stok Menipis', 'value' => number_format(BahanBaku::whereColumn('stok', '<=', 'stok_minimum')->count(), 0, ',', '.'), 'link' => route(auth()->user()->role === 'owner' ? 'owner.stok-bahan' : 'gudang.index', ['filter' => 'menipis'])],
+                ['label' => 'Nilai Persediaan Akhir Periode', 'value' => 'Rp ' . number_format((float) $totalNilaiPersediaan, 0, ',', '.'), 'link' => '#ringkasan-stok-bahan-akhir-periode'],
             ],
             'sections' => [
                 [
                     'title' => 'Ringkasan Stok Bahan Akhir Periode',
-                    'headers' => ['Nama Bahan', 'Stok Akhir Periode', 'Stok Minimum', 'Nilai Stok'],
+                    'headers' => ['Nama Bahan', 'Stok Akhir Periode', 'Stok Minimum', 'Harga Satuan', 'Nilai Stok'],
                     'rows' => $ringkasanBahanWebPdf,
                     'rows_excel' => $ringkasanBahanExcel,
-                    'widths' => [28, 18, 18, 20],
+                    'widths' => [25, 18, 18, 19, 20],
                 ],
                 [
                     'title' => 'Riwayat Stok Bahan Baku',
@@ -347,15 +365,24 @@ class ReportController extends Controller
             'produk_diproduksi' => $produksi->pluck('produk_id')->filter()->unique()->count(),
             'produksi_selesai' => $produksi->where('status', 'selesai')->count(),
             'summary' => [
-                ['label' => 'Total Aktivitas Produksi', 'value' => number_format($produksi->count(), 0, ',', '.')],
-                ['label' => 'Total Bahan Jadi', 'value' => number_format((float) $produksi->sum('jumlah_produksi'), 0, ',', '.')],
-                ['label' => 'Produk Diproduksi', 'value' => number_format($produksi->pluck('produk_id')->filter()->unique()->count(), 0, ',', '.')],
-                ['label' => 'Produksi Selesai', 'value' => number_format($produksi->where('status', 'selesai')->count(), 0, ',', '.')],
+                ['label' => 'Total Aktivitas Produksi', 'value' => number_format($produksi->count(), 0, ',', '.'), 'link' => route(auth()->user()->role === 'owner' ? 'owner.stok-produk' : 'produksi.riwayat', array_filter([
+                    'periode' => $period['type'],
+                    'tahun' => $period['year'],
+                    'bulan' => $period['type'] === 'bulanan' ? $period['month'] : null,
+                    'tanggal' => $period['type'] === 'harian' ? $period['date'] : null,
+                ]))],
+                ['label' => 'Total Produksi', 'value' => number_format((float) $produksi->sum('jumlah_produksi'), 0, ',', '.'), 'link' => route(auth()->user()->role === 'owner' ? 'owner.stok-produk' : 'produksi.riwayat', array_filter([
+                    'periode' => $period['type'],
+                    'tahun' => $period['year'],
+                    'bulan' => $period['type'] === 'bulanan' ? $period['month'] : null,
+                    'tanggal' => $period['type'] === 'harian' ? $period['date'] : null,
+                ]))],
+                ['label' => 'Produk Diproduksi', 'value' => number_format($produksi->pluck('produk_id')->filter()->unique()->count(), 0, ',', '.'), 'link' => '#ringkasan-hasil-produksi-per-produk'],
             ],
             'sections' => [
                 [
                     'title' => 'Ringkasan Hasil Produksi per Produk',
-                    'headers' => ['Produk', 'Total Jadi'],
+                    'headers' => ['Produk', 'Total Produksi'],
                     'rows' => $ringkasanProdukWebPdf,
                     'rows_excel' => $ringkasanProdukExcel,
                     'widths' => [36, 16],
@@ -483,6 +510,15 @@ class ReportController extends Controller
         $totalPerMetodeWebPdf = array_map(fn ($item) => [$item['label'], $item['total_formatted']], $totalPerMetode);
         $totalPerMetodeExcel = array_map(fn ($item) => [$item['label'], $item['total_raw']], $totalPerMetode);
 
+        $queryParams = $request->only(['periode', 'tanggal', 'bulan', 'tahun']);
+        $baseRoute = auth()->user()->role === 'owner' ? 'owner.transaksi' : 'penjualan.transaksi';
+
+        $summary = [
+            ['label' => 'Total Transaksi', 'value' => number_format($transaksi->count(), 0, ',', '.'), 'link' => route($baseRoute, $queryParams)],
+            ['label' => 'Transaksi Selesai', 'value' => number_format($transaksiSelesai->count(), 0, ',', '.'), 'link' => route($baseRoute, array_merge($queryParams, ['status' => 'selesai']))],
+            ['label' => 'Total Pendapatan', 'value' => 'Rp ' . number_format((float) $transaksiSelesai->sum('total'), 0, ',', '.'), 'link' => '#detail-transaksi'],
+        ];
+
         return [
             'title' => 'Laporan Penjualan',
             'subtitle' => 'Laporan transaksi penjualan online dan POS',
@@ -496,12 +532,7 @@ class ReportController extends Controller
             'transaksi_selesai' => $transaksiSelesai->count(),
             'total_pendapatan' => $transaksiSelesai->sum('total'),
             'avg_transaksi' => $avg,
-            'summary' => [
-                ['label' => 'Total Transaksi', 'value' => number_format($transaksi->count(), 0, ',', '.')],
-                ['label' => 'Transaksi Selesai', 'value' => number_format($transaksiSelesai->count(), 0, ',', '.')],
-                ['label' => 'Total Pendapatan', 'value' => 'Rp ' . number_format((float) $transaksiSelesai->sum('total'), 0, ',', '.')],
-                ['label' => 'Rata-rata Transaksi', 'value' => 'Rp ' . number_format($avg, 0, ',', '.')],
-            ],
+            'summary' => $summary,
             'sections' => [
                 [
                     'title' => 'Produk Terjual',
@@ -684,12 +715,12 @@ class ReportController extends Controller
 
         // Summary section
         if ($module === 'gudang') {
-            $xml .= $this->summaryRow('Total Jenis Bahan Baku', $report['total_bahan_baku'], 'Total Aktivitas Stok', $report['total_logs'], false, $contentStartIndex);
+            $xml .= $this->summaryRow('Total Bahan Baku', $report['total_bahan_baku'], 'Total Aktivitas Stok', $report['total_logs'], false, $contentStartIndex);
             $xml .= $this->summaryRow('Total Bahan Masuk', $report['total_masuk'], 'Total Bahan Keluar', $report['total_keluar'], false, $contentStartIndex);
-            $xml .= $this->summaryRow('Bahan Stok Menipis', $report['stok_menipis'], 'Nilai Persediaan Akhir', $report['total_nilai_persediaan'], true, $contentStartIndex);
+            $xml .= $this->summaryRow('Bahan Baku Stok Menipis', $report['stok_menipis'], 'Nilai Persediaan Akhir', $report['total_nilai_persediaan'], true, $contentStartIndex);
         } elseif ($module === 'produksi') {
-            $xml .= $this->summaryRow('Total Aktivitas Produksi', $report['total_produksi'], 'Total Bahan Jadi', $report['total_jadi'], false, $contentStartIndex);
-            $xml .= $this->summaryRow('Produk Diproduksi', $report['produk_diproduksi'], 'Produksi Selesai', $report['produksi_selesai'], false, $contentStartIndex);
+            $xml .= $this->summaryRow('Total Aktivitas Produksi', $report['total_produksi'], 'Total Produksi', $report['total_jadi'], false, $contentStartIndex);
+            $xml .= $this->summaryRow('Produk Diproduksi', $report['produk_diproduksi'], '', '', false, $contentStartIndex);
         } elseif ($module === 'penjualan') {
             $xml .= $this->summaryRow('Total Transaksi', $report['total_transaksi'], 'Transaksi Selesai', $report['transaksi_selesai'], false, $contentStartIndex);
             $xml .= $this->summaryRow('Total Pendapatan', $report['total_pendapatan'], 'Rata-rata Transaksi', $report['avg_transaksi'], true, $contentStartIndex);

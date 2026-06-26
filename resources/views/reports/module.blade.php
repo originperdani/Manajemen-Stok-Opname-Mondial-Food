@@ -19,6 +19,7 @@
 @endphp
 
 @section('title', $report['title'])
+@section('page-title', $report['title'])
 
 @section('sidebar-menu')
 @php $role = auth()->user()->role; @endphp
@@ -57,10 +58,7 @@
 @endsection
 
 @section('content')
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-        <h2 style="font-family: 'Raleway', sans-serif; font-weight: 800; background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-            {{ $report['title'] }}
-        </h2>
+    <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
         <div class="d-flex gap-2">
             <a href="{{ route($exportRoute, array_merge($exportParams, ['format' => 'pdf'])) }}" class="btn btn-sm" style="background: #ef4444; color: white; border-radius: 12px; padding: 0.4rem 1rem;">
                 Download PDF
@@ -117,9 +115,14 @@
                     </div>
                 @endif
 
-                <button type="submit" class="btn btn-primary" style="background: var(--gradient-gold); border: none; padding: 0.5rem 1rem; font-size: 0.875rem; height: 42px;">
-                    Tampilkan
-                </button>
+                <div class="form-group mb-0">
+                    <label class="form-label" style="font-size: 0.9rem; margin-bottom: 0.5rem; visibility: hidden;">Aksi</label>
+                    <div style="display: flex;">
+                        <button type="submit" class="btn btn-primary" style="background: var(--gradient-gold); border: none; padding: 0.5rem 1rem; font-size: 0.875rem; height: 42px;">
+                            Tampilkan
+                        </button>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
@@ -127,19 +130,32 @@
     <!-- Ringkasan -->
     <div class="stat-grid" style="margin-bottom: 2rem;">
         @foreach($report['summary'] as $summary)
-            <div class="stat-card" style="border-left: 5px solid var(--primary);">
+            @php
+                $isMenipis = stripos($summary['label'], 'menipis') !== false;
+                $borderColor = $isMenipis ? '#dc3545' : 'var(--primary)';
+                $textColor = $isMenipis ? '#dc3545' : 'inherit';
+            @endphp
+            @if(isset($summary['link']))
+                <a href="{{ $summary['link'] }}" class="stat-card" style="border-left: 5px solid {{ $borderColor }}; text-decoration: none; color: inherit; display: flex; cursor: pointer;">
+            @else
+                <div class="stat-card" style="border-left: 5px solid {{ $borderColor }};">
+            @endif
                 <div class="stat-info" style="flex: 1;">
-                    <h4>{{ $summary['label'] }}</h4>
-                    <p>{{ $summary['value'] }}</p>
+                    <h4 style="color: {{ $textColor }};">{{ $summary['label'] }}</h4>
+                    <p style="color: {{ $textColor }};">{{ $summary['value'] }}</p>
                 </div>
-            </div>
+            @if(isset($summary['link']))
+                </a>
+            @else
+                </div>
+            @endif
         @endforeach
     </div>
 
     <!-- Sections -->
     @foreach($report['sections'] as $section)
         @if($report['module'] === 'gudang' && isset($section['headers_masuk']))
-            <div class="card mb-4" style="border-radius: 16px; border: 1px solid var(--border); border-left: 5px solid var(--primary);">
+            <div data-target-id="{{ \Illuminate\Support\Str::slug($section['title']) }}" class="card mb-4" style="border-radius: 16px; border: 1px solid var(--border); border-left: 5px solid var(--primary);">
                 <div class="card-header">
                     <h3>{{ $section['title'] }}</h3>
                 </div>
@@ -212,7 +228,7 @@
                 </div>
             </div>
         @else
-            <div class="card mb-4" style="border-radius: 16px; border: 1px solid var(--border); border-left: 5px solid var(--primary);">
+            <div data-target-id="{{ \Illuminate\Support\Str::slug($section['title']) }}" class="card mb-4" style="border-radius: 16px; border: 1px solid var(--border); border-left: 5px solid var(--primary);">
                 <div class="card-header">
                     <h3>{{ $section['title'] }}</h3>
                 </div>
@@ -254,6 +270,28 @@
                                         <td style="border-top: 2px solid #d97706;">{{ number_format($totalProdukTerjual, 0, ',', '.') }}</td>
                                     </tr>
                                 @endif
+                                @if($report['module'] === 'penjualan' && strtoupper($section['title']) === 'DETAIL TRANSAKSI')
+                                    <tr style="background: #fef3c7; font-weight: bold;">
+                                        <td colspan="7" style="border-top: 2px solid #d97706; text-align: right;">Total Pendapatan (Transaksi Selesai)</td>
+                                        <td style="border-top: 2px solid #d97706;">Rp {{ number_format($report['total_pendapatan'] ?? 0, 0, ',', '.') }}</td>
+                                    </tr>
+                                @endif
+                                @if($report['module'] === 'gudang' && strtoupper($section['title']) === 'RINGKASAN STOK BAHAN AKHIR PERIODE')
+                                    @php
+                                        $totalNilai = 0;
+                                        foreach($section['rows'] as $row) {
+                                            // Row 4 is Nilai Stok (index 4)
+                                            if (isset($row[4])) {
+                                                $cleanNumber = preg_replace('/[^0-9]/', '', $row[4]);
+                                                $totalNilai += (int) $cleanNumber;
+                                            }
+                                        }
+                                    @endphp
+                                    <tr style="background: #fdf5e6; font-weight: bold; color: var(--primary);">
+                                        <td colspan="4" style="text-align: right; border-top: 2px solid var(--primary); padding-right: 1.5rem;">TOTAL NILAI PERSEDIAAN</td>
+                                        <td style="border-top: 2px solid var(--primary);">Rp {{ number_format($totalNilai, 0, ',', '.') }}</td>
+                                    </tr>
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -261,4 +299,46 @@
             </div>
         @endif
     @endforeach
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle internal summary card links
+        const internalLinks = document.querySelectorAll('a[href^="#"]');
+        internalLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const hash = this.getAttribute('href').substring(1);
+                const target = document.querySelector('[data-target-id="' + hash + '"]');
+                if (target) {
+                    const container = document.querySelector('.content-area');
+                    if (container) {
+                        container.scrollTo({
+                            top: target.offsetTop - 20,
+                            behavior: 'smooth'
+                        });
+                        // optionally update url without scrolling native
+                        history.pushState(null, null, '#' + hash);
+                    }
+                }
+            });
+        });
+        
+        // Handle page load hash
+        if (window.location.hash) {
+            const hash = window.location.hash.substring(1);
+            const target = document.querySelector('[data-target-id="' + hash + '"]');
+            if (target) {
+                const container = document.querySelector('.content-area');
+                if (container) {
+                    setTimeout(() => {
+                        container.scrollTo({
+                            top: target.offsetTop - 20,
+                            behavior: 'smooth'
+                        });
+                    }, 100);
+                }
+            }
+        }
+    });
+</script>
 @endsection

@@ -12,18 +12,18 @@
 
 @section('content')
 <div class="stat-grid">
-        <div class="stat-card" style="border-left: 5px solid var(--primary);">
+        <a href="{{ route('gudang.index') }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
             <div class="stat-info" style="flex: 1;">
                 <h4>Total Bahan Baku</h4>
                 <p>{{ $totalBahan }}</p>
             </div>
-        </div>
-        <div class="stat-card" style="border-left: 5px solid var(--primary);">
+        </a>
+        <a href="{{ route('gudang.index', ['filter' => 'menipis']) }}" class="stat-card" style="border-left: 5px solid #dc3545; text-decoration: none; color: inherit; display: flex; cursor: pointer;">
             <div class="stat-info" style="flex: 1;">
-                <h4>Stok Menipis</h4>
-                <p>{{ $bahanMenipis->count() }}</p>
+                <h4 style="color: #dc3545;">Bahan Baku Stok Menipis</h4>
+                <p style="color: #dc3545;">{{ $bahanMenipis->count() }}</p>
             </div>
-        </div>
+        </a>
     </div>
 
     @if($bahanMenipis->count() > 0)

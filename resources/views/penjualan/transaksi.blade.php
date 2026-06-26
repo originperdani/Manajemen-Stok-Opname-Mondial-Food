@@ -32,17 +32,85 @@
     .contact-actions .email-link { color: #1a73e8; }
 </style>
 
-<div class="action-header" style="border-left: 5px solid var(--primary);">
-    <form method="GET" class="d-flex gap-1" style="flex: 1; flex-wrap: wrap">
-        <input type="text" name="search" class="form-control" placeholder="Cari kode transaksi..." value="{{ request('search') }}" style="width:250px">
-        <select name="status" class="form-control" style="width:150px" onchange="this.form.submit()">
-            <option value="">Semua Status</option>
-            @foreach(['belum_bayar','pending','diproses','dikirim','selesai','dibatalkan'] as $s)
-                <option value="{{ $s }}" {{ request('status')==$s?'selected':'' }}>{{ ucfirst(str_replace('_',' ', $s)) }}</option>
-            @endforeach
-        </select>
-        <button class="btn btn-primary">Cari</button>
-    </form>
+<div class="stats-grid mb-4" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+    <div class="stat-card" style="background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 5px solid var(--primary); display: flex;">
+        <div class="stat-info" style="flex: 1;">
+            <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-light); margin-bottom: 0.5rem; font-weight: 600;">Total Transaksi</h4>
+            <p style="font-size: 1.75rem; font-weight: 700; color: var(--text-dark); margin: 0;">{{ $totalTransaksi }}</p>
+        </div>
+    </div>
+    <div class="stat-card" style="background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 5px solid var(--primary); display: flex;">
+        <div class="stat-info" style="flex: 1;">
+            <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-light); margin-bottom: 0.5rem; font-weight: 600;">Transaksi Selesai</h4>
+            <p style="font-size: 1.75rem; font-weight: 700; color: var(--text-dark); margin: 0;">{{ $transaksiSelesai }}</p>
+        </div>
+    </div>
+    <div class="stat-card" style="background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 5px solid var(--primary); display: flex;">
+        <div class="stat-info" style="flex: 1;">
+            <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-light); margin-bottom: 0.5rem; font-weight: 600;">Pesanan Pending</h4>
+            <p style="font-size: 1.75rem; font-weight: 700; color: var(--text-dark); margin: 0;">{{ $transaksiPending }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4" style="border-radius: 16px; border: 1px solid var(--border); background: #fff; border-left: 5px solid var(--primary);">
+    <div class="card-body" style="padding: 1.5rem;">
+        <form method="GET" action="{{ route('penjualan.transaksi') }}" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+            <div class="form-group mb-0">
+                <label class="form-label" style="font-size: 0.9rem; margin-bottom: 0.5rem;">Periode</label>
+                <select name="periode" class="form-control" onchange="this.form.submit()" style="min-width: 150px; padding: 0.5rem 0.75rem;">
+                    <option value="all" {{ $periode == 'all' ? 'selected' : '' }}>Semua Periode</option>
+                    <option value="harian" {{ $periode == 'harian' ? 'selected' : '' }}>Harian</option>
+                    <option value="bulanan" {{ $periode == 'bulanan' ? 'selected' : '' }}>Bulanan</option>
+                    <option value="tahunan" {{ $periode == 'tahunan' ? 'selected' : '' }}>Tahunan</option>
+                </select>
+            </div>
+
+            @if($periode == 'harian')
+                <div class="form-group mb-0">
+                    <label class="form-label" style="font-size: 0.9rem; margin-bottom: 0.5rem;">Tanggal</label>
+                    <input type="date" name="tanggal" class="form-control" value="{{ $tanggal }}" style="min-width: 180px; padding: 0.5rem 0.75rem;">
+                </div>
+            @elseif($periode == 'bulanan')
+                <div class="form-group mb-0">
+                    <label class="form-label" style="font-size: 0.9rem; margin-bottom: 0.5rem;">Bulan</label>
+                    <select name="bulan" class="form-control" style="min-width: 150px; padding: 0.5rem 0.75rem;">
+                        @for($i = 1; $i <= 12; $i++)
+                            <option value="{{ $i }}" {{ $bulan == $i ? 'selected' : '' }}>
+                                {{ \Carbon\Carbon::create(2024, $i, 1)->translatedFormat('F') }}
+                            </option>
+                        @endfor
+                    </select>
+                </div>
+            @endif
+
+            @if($periode != 'harian' && $periode != 'all')
+                <div class="form-group mb-0">
+                    <label class="form-label" style="font-size: 0.9rem; margin-bottom: 0.5rem;">Tahun</label>
+                    <select name="tahun" class="form-control" style="min-width: 120px; padding: 0.5rem 0.75rem;">
+                        @for($i = 2024; $i <= date('Y'); $i++)
+                            <option value="{{ $i }}" {{ $tahun == $i ? 'selected' : '' }}>{{ $i }}</option>
+                        @endfor
+                    </select>
+                </div>
+            @endif
+
+            <div class="form-group mb-0" style="margin-left: auto;">
+                <label class="form-label" style="font-size: 0.9rem; margin-bottom: 0.5rem; visibility: hidden;">Pencarian</label>
+                <div class="d-flex gap-1" style="flex: 1; flex-wrap: wrap">
+                    <input type="text" name="search" class="form-control" placeholder="Cari kode transaksi..." value="{{ request('search') }}" style="width:250px; padding: 0.5rem 0.75rem;">
+                    <select name="status" class="form-control" style="width:150px; padding: 0.5rem 0.75rem;" onchange="this.form.submit()">
+                        <option value="">Semua Status</option>
+                        @foreach(['belum_bayar','pending','diproses','dikirim','selesai','dibatalkan'] as $s)
+                            <option value="{{ $s }}" {{ request('status') === $s ? 'selected' : '' }}>{{ ucfirst(str_replace('_',' ',$s)) }}</option>
+                        @endforeach
+                    </select>
+                    <button class="btn btn-primary" type="submit" style="background: var(--gradient-gold); border: none; padding: 0.5rem 1rem; font-size: 0.875rem; height: 42px;">Cari</button>
+                    <a href="{{ route('penjualan.transaksi') }}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem; height: 42px; display: flex; align-items: center;">Reset</a>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
 <div class="card" style="border-left: 5px solid var(--primary);"><div class="table-responsive"><table>

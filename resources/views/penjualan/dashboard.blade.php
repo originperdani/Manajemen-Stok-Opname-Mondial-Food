@@ -11,24 +11,24 @@
 
 @section('content')
 <div class="stat-grid">
-    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+    <a href="{{ route('penjualan.laporan', ['periode' => 'harian', 'tanggal' => date('Y-m-d')]) }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
         <div class="stat-info" style="flex: 1;">
             <h4>Pendapatan Hari Ini</h4>
             <p>Rp {{ number_format($pendapatanHariIni, 0, ',', '.') }}</p>
         </div>
-    </div>
-    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+    </a>
+    <a href="{{ route('penjualan.transaksi', ['periode' => 'harian', 'tanggal' => date('Y-m-d')]) }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
         <div class="stat-info" style="flex: 1;">
             <h4>Transaksi Hari Ini</h4>
             <p>{{ $transaksiHariIni }}</p>
         </div>
-    </div>
-    <div class="stat-card" style="border-left: 5px solid var(--primary);">
+    </a>
+    <a href="{{ route('penjualan.transaksi', ['status' => 'pending']) }}" class="stat-card" style="border-left: 5px solid var(--primary); text-decoration: none; color: inherit; display: flex; cursor: pointer;">
         <div class="stat-info" style="flex: 1;">
             <h4>Pesanan Pending</h4>
             <p>{{ $transaksiPending }}</p>
         </div>
-    </div>
+    </a>
 </div>
 
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
@@ -85,9 +85,11 @@
                             'pending'=>'warning',
                             'proses'=>'info',
                             'dikirim'=>'info',
+                            'belum_bayar'=>'danger',
+                            'dibatalkan'=>'danger',
                             default=>'secondary' 
                         } }}">
-                            {{ ucfirst($displayStatus) }}
+                            {{ ucfirst(str_replace('_', ' ', $displayStatus)) }}
                         </span>
                     </td>
                     <td style="font-size: 0.85rem; color: var(--text-light);">{{ $t->created_at->format('d/m H:i') }}</td>

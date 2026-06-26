@@ -192,15 +192,29 @@ class OwnerController extends Controller
         return view('owner.laporan', compact('laporanHarian', 'totalBulanIni', 'produkTerlaris', 'bulan', 'tahun'));
     }
 
-    public function stokProduk()
+    public function stokProduk(Request $request)
     {
-        $produk = Produk::with('kategori')->get();
+        $query = Produk::with('kategori');
+        if ($request->search) {
+            $query->where('nama_produk', 'like', "%{$request->search}%");
+        }
+        if ($request->filter === 'menipis') {
+            $query->whereColumn('stok', '<=', 'stok_minimum');
+        }
+        $produk = $query->get();
         return view('owner.stok-produk', compact('produk'));
     }
 
-    public function stokBahan()
+    public function stokBahan(Request $request)
     {
-        $bahan = BahanBaku::all();
+        $query = BahanBaku::query();
+        if ($request->search) {
+            $query->where('nama_bahan', 'like', "%{$request->search}%");
+        }
+        if ($request->filter === 'menipis') {
+            $query->whereColumn('stok', '<=', 'stok_minimum');
+        }
+        $bahan = $query->get();
         return view('owner.stok-bahan', compact('bahan'));
     }
 }
