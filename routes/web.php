@@ -174,7 +174,7 @@ Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->grou
 });
 
 // Admin Gudang Routes
-Route::middleware(['auth', 'role:admin_gudang'])->prefix('gudang')->name('gudang.')->group(function () {
+Route::middleware(['auth', 'role:admin_gudang,owner'])->prefix('gudang')->name('gudang.')->group(function () {
     Route::get('/dashboard', [GudangController::class, 'dashboard'])->name('dashboard');
     Route::get('/bahan', [GudangController::class, 'index'])->name('index');
     Route::get('/bahan/create', [GudangController::class, 'create'])->name('create');
@@ -191,7 +191,7 @@ Route::middleware(['auth', 'role:admin_gudang'])->prefix('gudang')->name('gudang
 });
 
 // Admin Penjualan Routes
-Route::middleware(['auth', 'role:admin_penjualan'])->prefix('penjualan')->name('penjualan.')->group(function () {
+Route::middleware(['auth', 'role:admin_penjualan,owner'])->prefix('penjualan')->name('penjualan.')->group(function () {
     Route::get('/dashboard', [PenjualanController::class, 'dashboard'])->name('dashboard');
     Route::get('/pos', [PenjualanController::class, 'pos'])->name('pos');
     Route::post('/pos/proses', [PenjualanController::class, 'prosesPos'])->name('pos.proses');
@@ -208,7 +208,7 @@ Route::middleware(['auth', 'role:admin_penjualan'])->prefix('penjualan')->name('
 });
 
 // Admin Produksi Routes
-Route::middleware(['auth', 'role:admin_produksi'])->prefix('produksi')->name('produksi.')->group(function () {
+Route::middleware(['auth', 'role:admin_produksi,owner'])->prefix('produksi')->name('produksi.')->group(function () {
     Route::get('/dashboard', [ProduksiController::class, 'dashboard'])->name('dashboard');
     Route::get('/produk', [ProduksiController::class, 'produk'])->name('produk');
     Route::get('/produk/create', [ProduksiController::class, 'createProduk'])->name('produk.create');

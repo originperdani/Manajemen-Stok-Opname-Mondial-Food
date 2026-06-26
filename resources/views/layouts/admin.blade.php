@@ -1037,6 +1037,10 @@
             </div>
             <ul class="sidebar-menu">
                 @yield('sidebar-menu')
+                @if(auth()->user()->role === 'owner' && !request()->is('owner*'))
+                    <div class="sidebar-divider">Akses Owner</div>
+                    <li><a href="{{ route('owner.dashboard') }}"><i class="fas fa-arrow-left"></i> Kembali ke Owner</a></li>
+                @endif
                 <div class="sidebar-divider">Akun</div>
                 <li>
                     <a href="{{ route('home') }}"><i class="fas fa-store"></i> Lihat Toko</a>

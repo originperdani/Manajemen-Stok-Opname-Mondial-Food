@@ -10,6 +10,10 @@
 <div class="sidebar-divider">Monitoring Stok</div>
 <li><a href="{{ route('owner.stok-produk') }}" class="active"><i class="fas fa-birthday-cake"></i> Stok Produk</a></li>
 <li><a href="{{ route('owner.stok-bahan') }}"><i class="fas fa-boxes"></i> Stok Bahan Baku</a></li>
+<div class="sidebar-divider">Akses Admin</div>
+<li><a href="{{ route('gudang.dashboard') }}"><i class="fas fa-warehouse"></i> Admin Gudang</a></li>
+<li><a href="{{ route('penjualan.dashboard') }}"><i class="fas fa-cash-register"></i> Admin Penjualan</a></li>
+<li><a href="{{ route('produksi.dashboard') }}"><i class="fas fa-industry"></i> Admin Produksi</a></li>
 @endsection
 
 @section('content')
