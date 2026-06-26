@@ -1534,6 +1534,12 @@
             if (overlay) {
                 overlay.classList.toggle('active');
             }
+
+            if (sidebar && sidebar.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
         }
 
         function toggleDropdownCustomer() {
