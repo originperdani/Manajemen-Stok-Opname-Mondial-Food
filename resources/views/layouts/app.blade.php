@@ -460,8 +460,8 @@
             position: fixed;
             top: 0;
             left: -100%;
-            width: 75%;
-            max-width: 280px;
+            width: 65%;
+            max-width: 240px;
             height: 100vh;
             background: var(--gradient-dark);
             z-index: 999999999999;
